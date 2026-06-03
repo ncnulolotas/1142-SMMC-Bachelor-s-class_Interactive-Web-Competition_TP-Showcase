@@ -140,6 +140,18 @@
         .modal-closed#modal-overlay { opacity: 0; visibility: hidden; transition: visibility 0s linear 0.3s, opacity 0.3s ease; }
         .modal-closed #modal-content { transform: scale(0.95) translateY(20px); opacity: 0; }
 
+        /* Audio controls: keep visible above mobile browser toolbar */
+        @media (max-width: 640px) {
+            #audio-controller {
+                bottom: calc(env(safe-area-inset-bottom, 0px) + 5.25rem);
+                width: calc(100vw - 2rem);
+                justify-content: center;
+                flex-wrap: wrap;
+                border-radius: 1rem;
+            }
+        }
+
+
         /* 手機版 modal 必須蓋過固定導覽列，並保留可按的關閉按鈕 */
         #modal-overlay { z-index: 10000; overflow-y: auto; }
         @media (max-width: 640px) {
@@ -594,7 +606,7 @@
     </div>
 
     <!-- Floating Audio Controls -->
-    <div id="audio-controller" class="hidden fixed left-1/2 -translate-x-1/2 bottom-6 z-[80] glass rounded-full shadow-2xl border border-blue-200 dark:border-tech-accent/30 px-3 py-2 items-center gap-2">
+    <div id="audio-controller" class="hidden fixed left-1/2 -translate-x-1/2 bottom-6 z-[9999] glass rounded-full shadow-2xl border border-blue-200 dark:border-tech-accent/30 px-3 py-2 items-center gap-2">
         <button id="audio-control-pause" type="button" class="audio-control-btn inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs sm:text-sm font-medium bg-blue-100 dark:bg-tech-800 text-blue-700 dark:text-tech-accent hover:bg-blue-200 dark:hover:bg-tech-700 transition" onclick="toggleAudioPause()">
             <i class="ph ph-pause text-base pointer-events-none"></i>
             <span data-i18n="audioPause" class="pointer-events-none">暫停</span>
@@ -916,6 +928,9 @@
                 cardProjects: "Term Projects",
                 audioPlay: "Audio Guide",
                 audioStop: "Stop Audio",
+                audioPause: "Pause",
+                audioResume: "Resume",
+                audioRestart: "Restart",
                 mobileLang: "Switch to 繁體中文",
                 mobileTheme: "Toggle Theme",
                 courseTitle: "Strategic Management",
@@ -1008,6 +1023,8 @@
         let isAudioPaused = false;
         let currentUtterance = null;
         let audioKeepAliveTimer = null;
+        let audioControllerActive = false;
+        let audioSessionId = 0;
         let isDarkMode = false;
         let activeFilter = 'ALL';
         let currentPage = 'home';
@@ -1297,7 +1314,7 @@
                     return;
                 }
                 
-                if (isSpeaking) {
+                if (audioControllerActive || isSpeaking || isAudioPaused) {
                     stopAudioGuide();
                 } else {
                     playAudioGuide();
@@ -1327,6 +1344,8 @@
         }
 
         function stopAudioGuide() {
+            audioSessionId++;
+            audioControllerActive = false;
             if (synth) synth.cancel();
             isSpeaking = false;
             isAudioPaused = false;
@@ -1369,11 +1388,15 @@
 
         function playAudioGuide() {
             if (!synth) return;
-            synth.cancel(); // Reset
-            isSpeaking = false;
+            audioSessionId++;
+            const sessionId = audioSessionId;
+            audioControllerActive = true;
+            isSpeaking = true;
             isAudioPaused = false;
             currentUtterance = null;
             stopAudioKeepAlive();
+            updateAudioButtonUI();
+            synth.cancel(); // Reset
 
             const t = translations[currentLang];
             let rawText = "";
@@ -1415,6 +1438,8 @@
             utterance.pitch = 1.0;
 
             utterance.onstart = () => {
+                if (sessionId !== audioSessionId) return;
+                audioControllerActive = true;
                 isSpeaking = true;
                 isAudioPaused = false;
                 startAudioKeepAlive();
@@ -1422,6 +1447,8 @@
             };
             
             utterance.onend = () => {
+                if (sessionId !== audioSessionId) return;
+                audioControllerActive = false;
                 isSpeaking = false;
                 isAudioPaused = false;
                 currentUtterance = null;
@@ -1430,14 +1457,16 @@
             };
 
             utterance.onerror = (e) => {
+                if (sessionId !== audioSessionId) return;
                 if (e.error !== 'canceled' && e.error !== 'interrupted') {
                     console.error("Speech Synthesis Error:", e);
+                    audioControllerActive = false;
+                    isSpeaking = false;
+                    isAudioPaused = false;
+                    currentUtterance = null;
+                    stopAudioKeepAlive();
+                    updateAudioButtonUI();
                 }
-                isSpeaking = false;
-                isAudioPaused = false;
-                currentUtterance = null;
-                stopAudioKeepAlive();
-                updateAudioButtonUI();
             };
 
             synth.speak(utterance);
@@ -1453,7 +1482,7 @@
                 const icon = btn.querySelector('i');
                 const span = btn.querySelector('span');
                 
-                if (isSpeaking) {
+                if (audioControllerActive || isSpeaking || isAudioPaused) {
                     btn.classList.add('animate-pulse', 'bg-red-100', 'dark:bg-red-900/50', 'text-red-600', 'dark:text-red-400');
                     btn.classList.remove('bg-blue-100', 'dark:bg-tech-800', 'text-blue-700', 'dark:text-tech-accent');
                     if(icon) icon.classList.replace('ph-speaker-high', 'ph-stop');
@@ -1467,7 +1496,7 @@
             });
 
             if (controller) {
-                if (isSpeaking) {
+                if (audioControllerActive || isSpeaking || isAudioPaused) {
                     controller.classList.remove('hidden');
                     controller.classList.add('flex');
                 } else {
@@ -1487,6 +1516,11 @@
                     if (span) span.innerText = translations[currentLang].audioPause;
                 }
             }
+
+            const restartSpan = document.querySelector('#audio-control-restart span');
+            const stopSpan = document.querySelector('#audio-control-stop span');
+            if (restartSpan) restartSpan.innerText = translations[currentLang].audioRestart;
+            if (stopSpan) stopSpan.innerText = translations[currentLang].audioStop;
         }
     </script>
 </body>
