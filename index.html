@@ -78,6 +78,51 @@
             border-color: rgba(6, 182, 212, 0.45);
         }
 
+        /* TP 專案卡片：手機/平板點擊時不要先閃白框，直接進入光暈狀態 */
+        .project-card,
+        .project-card * {
+            -webkit-tap-highlight-color: transparent !important;
+        }
+        .project-card:focus,
+        .project-card:focus-visible,
+        .project-card a:focus,
+        .project-card a:focus-visible,
+        .project-card button:focus,
+        .project-card button:focus-visible {
+            outline: none !important;
+        }
+        @media (hover: none) and (pointer: coarse) {
+            .project-card:active,
+            .project-card.touch-active {
+                transform: translateY(-4px) scale(0.995);
+                background: rgba(255, 255, 255, 0.76) !important;
+                border-color: rgba(37, 99, 235, 0.55) !important;
+                box-shadow:
+                    0 0 0 1px rgba(37, 99, 235, 0.16),
+                    0 0 22px rgba(37, 99, 235, 0.18),
+                    0 18px 40px -20px rgba(37, 99, 235, 0.45) !important;
+            }
+            .dark .project-card:active,
+            .dark .project-card.touch-active {
+                background: rgba(15, 23, 42, 0.78) !important;
+                border-color: rgba(6, 182, 212, 0.75) !important;
+                box-shadow:
+                    0 0 0 1px rgba(6, 182, 212, 0.35),
+                    0 0 28px rgba(6, 182, 212, 0.34),
+                    0 20px 46px -24px rgba(6, 182, 212, 0.60) !important;
+            }
+            .dark .project-card:active::before,
+            .dark .project-card.touch-active::before {
+                content: "";
+                position: absolute;
+                inset: -1px;
+                border-radius: inherit;
+                pointer-events: none;
+                background: radial-gradient(circle at 35% 25%, rgba(6, 182, 212, 0.16), transparent 45%);
+                z-index: 0;
+            }
+        }
+
         /* 只在切換亮/暗色的瞬間關閉大範圍轉場，避免手機 Safari 卡住；不影響卡片 hover / touch 動態 */
         body.theme-switching,
         body.theme-switching * {
@@ -548,6 +593,22 @@
         </div>
     </div>
 
+    <!-- Floating Audio Controls -->
+    <div id="audio-controller" class="hidden fixed left-1/2 -translate-x-1/2 bottom-6 z-[80] glass rounded-full shadow-2xl border border-blue-200 dark:border-tech-accent/30 px-3 py-2 items-center gap-2">
+        <button id="audio-control-pause" type="button" class="audio-control-btn inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs sm:text-sm font-medium bg-blue-100 dark:bg-tech-800 text-blue-700 dark:text-tech-accent hover:bg-blue-200 dark:hover:bg-tech-700 transition" onclick="toggleAudioPause()">
+            <i class="ph ph-pause text-base pointer-events-none"></i>
+            <span data-i18n="audioPause" class="pointer-events-none">暫停</span>
+        </button>
+        <button id="audio-control-restart" type="button" class="audio-control-btn inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs sm:text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition" onclick="restartAudioGuide()">
+            <i class="ph ph-arrow-clockwise text-base pointer-events-none"></i>
+            <span data-i18n="audioRestart" class="pointer-events-none">重來</span>
+        </button>
+        <button id="audio-control-stop" type="button" class="audio-control-btn inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs sm:text-sm font-medium bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/60 transition" onclick="stopAudioGuide()">
+            <i class="ph ph-stop text-base pointer-events-none"></i>
+            <span data-i18n="audioStop" class="pointer-events-none">停止導覽</span>
+        </button>
+    </div>
+
     <!-- Footer -->
     <footer class="border-t border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-tech-900/50 backdrop-blur-md py-10 mt-20 relative z-10">
         <div class="max-w-7xl mx-auto px-4 text-center">
@@ -599,7 +660,7 @@
             { id: "G5", zh: "鴻海", en: "Foxconn", category: "C", icon: "ph-factory", website: "https://www.foxconn.com/zh-tw", finance: "https://tw.stock.yahoo.com/quote/2317.TW/technical-analysis", logo: "https://drive.google.com/file/d/1Y8PKpKv-Ed7WNitzKSVFQg1j623Ffluf/view", link: "https://yun963943-design.github.io/0511SMMC_FOXCONN/" },
             { id: "G6", zh: "南亞科", en: "Nanya Tech", category: "A", icon: "ph-memory", website: "https://www.nanya.com/tw/", finance: "https://tw.stock.yahoo.com/quote/2408.TW/technical-analysis", logo: "https://drive.google.com/file/d/15Ap35oZL8Q5xcXZ4R4HwXGCxD7OYNIXu/view", link: "https://novoicefire.github.io/SMMCTP0/" },
             { id: "G7", zh: "台達電", en: "Delta", category: "C", icon: "ph-lightning", website: "https://www.deltaww.com/zh-TW/index", finance: "https://tw.stock.yahoo.com/quote/2308.TW/technical-analysis", logo: "https://drive.google.com/file/d/1OwvxfUXDCABiYs5IJvFO6HJf1mjc-I3_/view", link: "https://jessica5520119-cmyk.github.io/SMMC_G7_DELTA_Interactive-Webpage-Competition/" },
-            { id: "G8", zh: "合一生技", en: "Oneness Biotech", category: "D", icon: "ph-flask", website: "https://onenessbio.com/", finance: "https://tw.stock.yahoo.com/quote/4743.TWO/technical-analysis", logo: "https://drive.google.com/file/d/1WL2x3-8UP9oWpoVonUJOFwNSDEqBckDE/view", link: "https://moodle.ncnu.edu.tw/mod/forum/discuss.php?d=25181" },
+            { id: "G8", zh: "合一生技", en: "Oneness Biotech", category: "D", icon: "ph-flask", website: "https://onenessbio.com/", finance: "https://tw.stock.yahoo.com/quote/4743.TWO/technical-analysis", logo: "https://drive.google.com/file/d/1WL2x3-8UP9oWpoVonUJOFwNSDEqBckDE/view", link: "https://yoshan940605.github.io/1142G8TP/" },
             { id: "G9", zh: "上銀科技", en: "HIWIN", category: "D", icon: "ph-robot", website: "https://www.hiwin.tw/", finance: "https://tw.stock.yahoo.com/quote/2049.TW/technical-analysis", logo: "https://drive.google.com/file/d/1Nsdb2oDt0CED3cbldSbgBNhSXTl_QW3o/view", link: "https://paullai1102-creator.github.io/0511G9TP0/" },
             { id: "G10", zh: "聯華電子", en: "UMC", category: "A", icon: "ph-hard-drives", website: "https://www.umc.com/zh-TW/home/Index", finance: "https://tw.stock.yahoo.com/quote/2303.TW/technical-analysis", logo: "https://drive.google.com/file/d/1eS4YBRp6XUupjDVBvybXeBRLN6lO8tVo/view", link: "https://s112212022-stack.github.io/G10TP/" },
             { id: "G11", zh: "聯發科", en: "MediaTek", category: "B", icon: "ph-wifi-high", website: "https://www.mediatek.com/zh-tw/", finance: "https://tw.stock.yahoo.com/quote/2454.TW/technical-analysis", logo: "https://drive.google.com/file/d/1ffA8b5cwN2Q19hWHt9GGMYXfllzpNr78/view", link: "https://tim1218ok.github.io/G11/" }
@@ -756,6 +817,9 @@
                 cardProjects: "專案清單",
                 audioPlay: "語音導覽",
                 audioStop: "停止導覽",
+                audioPause: "暫停",
+                audioResume: "繼續",
+                audioRestart: "重來",
                 mobileLang: "切換至 English",
                 mobileTheme: "切換深/淺色模式",
                 courseTitle: "國際策略管理",
@@ -852,6 +916,9 @@
                 cardProjects: "Term Projects",
                 audioPlay: "Audio Guide",
                 audioStop: "Stop Audio",
+                audioPause: "Pause",
+                audioResume: "Resume",
+                audioRestart: "Restart",
                 mobileLang: "Switch to 繁體中文",
                 mobileTheme: "Toggle Theme",
                 courseTitle: "Strategic Management",
@@ -941,6 +1008,9 @@
         // --- Memory-based State Management ---
         let currentLang = 'zh';
         let isSpeaking = false;
+        let isAudioPaused = false;
+        let currentUtterance = null;
+        let audioKeepAliveTimer = null;
         let isDarkMode = false;
         let activeFilter = 'ALL';
         let currentPage = 'home';
@@ -990,15 +1060,19 @@
                 document.querySelectorAll('.tech-card.touch-active').forEach(el => el.classList.remove('touch-active'));
             };
 
-            document.addEventListener('pointerdown', (event) => {
+            const applyTouchActive = (event) => {
                 if (event.pointerType === 'mouse') return;
                 const card = event.target.closest('.tech-card');
                 if (!card) return;
                 card.classList.add('touch-active');
-            }, { passive: true });
+            };
 
-            ['pointerup', 'pointercancel', 'pointerleave', 'scroll'].forEach(eventName => {
-                document.addEventListener(eventName, clearTouchActive, { passive: true });
+            // touchstart 比 pointerdown 更早觸發，可避免 iOS 先出現預設白色 tap highlight。
+            document.addEventListener('touchstart', applyTouchActive, { passive: true, capture: true });
+            document.addEventListener('pointerdown', applyTouchActive, { passive: true, capture: true });
+
+            ['touchend', 'touchcancel', 'pointerup', 'pointercancel', 'pointerleave', 'scroll'].forEach(eventName => {
+                document.addEventListener(eventName, clearTouchActive, { passive: true, capture: true });
             });
         }
 
@@ -1102,7 +1176,7 @@
                 ` : '';
 
                 const card = `
-                    <div class="glass rounded-xl p-6 tech-card flex flex-col justify-between h-full group relative overflow-hidden">
+                    <div class="glass rounded-xl p-6 tech-card project-card flex flex-col justify-between h-full group relative overflow-hidden">
                         <div class="absolute -right-6 -top-6 w-24 h-24 bg-blue-500/10 dark:bg-tech-accent/10 rounded-full blur-xl group-hover:bg-blue-500/20 dark:group-hover:bg-tech-accent/20 transition-all duration-500 z-0"></div>
                         ${logoBgHtml}
                         <div class="relative z-10">
@@ -1237,15 +1311,72 @@
             }
         }
 
+        function stopAudioKeepAlive() {
+            if (audioKeepAliveTimer) {
+                clearInterval(audioKeepAliveTimer);
+                audioKeepAliveTimer = null;
+            }
+        }
+
+        function startAudioKeepAlive() {
+            stopAudioKeepAlive();
+            audioKeepAliveTimer = setInterval(() => {
+                if (!synth || !isSpeaking || isAudioPaused) return;
+                try {
+                    synth.pause();
+                    synth.resume();
+                } catch (e) {}
+            }, 10000);
+        }
+
         function stopAudioGuide() {
             if (synth) synth.cancel();
             isSpeaking = false;
+            isAudioPaused = false;
+            currentUtterance = null;
+            stopAudioKeepAlive();
             updateAudioButtonUI();
+        }
+
+        function toggleAudioPause() {
+            if (!synth) return;
+
+            if (!isSpeaking) {
+                playAudioGuide();
+                return;
+            }
+
+            try {
+                if (isAudioPaused) {
+                    synth.resume();
+                    isAudioPaused = false;
+                    startAudioKeepAlive();
+                } else {
+                    synth.pause();
+                    isAudioPaused = true;
+                    stopAudioKeepAlive();
+                }
+                updateAudioButtonUI();
+            } catch (e) {
+                console.error("Pause/Resume failed:", e);
+            }
+        }
+
+        function restartAudioGuide() {
+            if (!synth) {
+                showMessage(currentLang === 'zh' ? '環境不支援語音功能' : 'Not supported');
+                return;
+            }
+            playAudioGuide();
         }
 
         function playAudioGuide() {
             if (!synth) return;
             synth.cancel(); // Reset
+            isSpeaking = false;
+            isAudioPaused = false;
+            currentUtterance = null;
+            stopAudioKeepAlive();
 
             const t = translations[currentLang];
             let rawText = "";
@@ -1275,6 +1406,7 @@
 
             const scriptText = cleanText(rawText);
             const utterance = new SpeechSynthesisUtterance(scriptText);
+            currentUtterance = utterance;
             
             const bestVoice = getBestVoice(currentLang);
             if (bestVoice) {
@@ -1287,11 +1419,16 @@
 
             utterance.onstart = () => {
                 isSpeaking = true;
+                isAudioPaused = false;
+                startAudioKeepAlive();
                 updateAudioButtonUI();
             };
             
             utterance.onend = () => {
                 isSpeaking = false;
+                isAudioPaused = false;
+                currentUtterance = null;
+                stopAudioKeepAlive();
                 updateAudioButtonUI();
             };
 
@@ -1300,23 +1437,19 @@
                     console.error("Speech Synthesis Error:", e);
                 }
                 isSpeaking = false;
+                isAudioPaused = false;
+                currentUtterance = null;
+                stopAudioKeepAlive();
                 updateAudioButtonUI();
             };
-
-            // Hack for Chrome bug that stops synthesis after 15 seconds
-            const resumeInfinity = () => {
-                if (!isSpeaking) return;
-                synth.pause();
-                synth.resume();
-                setTimeout(resumeInfinity, 10000);
-            };
-            setTimeout(resumeInfinity, 10000);
 
             synth.speak(utterance);
         }
 
         function updateAudioButtonUI() {
             const btns = [document.getElementById('btn-audio'), document.getElementById('btn-audio-mobile')];
+            const controller = document.getElementById('audio-controller');
+            const pauseBtn = document.getElementById('audio-control-pause');
             
             btns.forEach(btn => {
                 if(!btn) return;
@@ -1335,6 +1468,28 @@
                     if (span) span.innerText = translations[currentLang].audioPlay;
                 }
             });
+
+            if (controller) {
+                if (isSpeaking) {
+                    controller.classList.remove('hidden');
+                    controller.classList.add('flex');
+                } else {
+                    controller.classList.add('hidden');
+                    controller.classList.remove('flex');
+                }
+            }
+
+            if (pauseBtn) {
+                const icon = pauseBtn.querySelector('i');
+                const span = pauseBtn.querySelector('span');
+                if (isAudioPaused) {
+                    if (icon) icon.className = 'ph ph-play text-base pointer-events-none';
+                    if (span) span.innerText = translations[currentLang].audioResume;
+                } else {
+                    if (icon) icon.className = 'ph ph-pause text-base pointer-events-none';
+                    if (span) span.innerText = translations[currentLang].audioPause;
+                }
+            }
         }
     </script>
 </body>
