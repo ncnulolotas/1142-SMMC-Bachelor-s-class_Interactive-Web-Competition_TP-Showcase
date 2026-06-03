@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMMC 1142 | 國際策略管理 TP專案展示</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans TC', 'sans-serif'],
+                    },
+                    colors: {
+                        tech: {
+                            900: '#0B1120',
+                            800: '#0F172A',
+                            700: '#1E293B',
+                            accent: '#06B6D4',
+                        }
+                    },
+                    backgroundImage: {
+                        'grid-pattern': "linear-gradient(to right, #80808012 1px, transparent 1px), linear-gradient(to bottom, #80808012 1px, transparent 1px)",
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        .dark ::-webkit-scrollbar-thumb:hover { background: #06B6D4; }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .dark .glass {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tech-card { transition: all 0.3s ease; cursor: pointer; }
+        .tech-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px -10px var(--tw-shadow-color);
+        }
+        .dark .tech-card:hover {
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+            border-color: rgba(6, 182, 212, 0.5);
+        }
+        .bg-grid { background-size: 40px 40px; }
+
+        /* 修復彈出視窗遮罩 Bug */
+        .modal-open { opacity: 1 !important; pointer-events: auto !important; visibility: visible !important; }
+        .modal-closed { opacity: 0 !important; pointer-events: none !important; visibility: hidden !important; }
+        #modal-content { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease; }
+        .modal-open #modal-content { transform: scale(1) translateY(0); opacity: 1; }
+        .modal-closed #modal-content { transform: scale(0.95) translateY(20px); opacity: 0; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 dark:bg-tech-900 dark:text-gray-100 transition-colors duration-300 antialiased font-sans bg-grid bg-grid-pattern relative">
+    
+    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-tech-accent/20 rounded-full blur-[120px] pointer-events-none hidden dark:block -z-10"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-[9999] glass transition-all duration-300 border-b border-gray-200 dark:border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer transition-transform hover:scale-105" onclick="navigateTo('home')" title="返回首頁">
+                    <i class="ph-fill ph-planet text-3xl text-blue-600 dark:text-tech-accent pointer-events-none"></i>
+                    <div class="pointer-events-none">
+                        <h1 class="font-bold text-lg leading-tight tracking-wide" data-i18n="navTitle">SMMC 1142</h1>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 font-medium" data-i18n="navSubtitle">國策管 TP專案</p>
+                    </div>
+                </div>
+
+                <!-- Desktop Actions -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <div class="flex space-x-2 mr-4">
+                        <button type="button" onclick="navigateTo('intro')" class="px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-gray-100 dark:hover:bg-gray-800" data-i18n="navIntro">簡介</button>
+                        <button type="button" onclick="navigateTo('team')" class="px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-gray-100 dark:hover:bg-gray-800" data-i18n="navTeam">團隊</button>
+                        <button type="button" onclick="navigateTo('projects')" class="px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-gray-100 dark:hover:bg-gray-800" data-i18n="navProjects">專案</button>
+                    </div>
+
+                    <button id="btn-audio" type="button" class="flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 dark:bg-tech-800 text-blue-700 dark:text-tech-accent hover:bg-blue-200 dark:hover:bg-tech-700 transition font-medium text-sm border border-blue-200 dark:border-tech-accent/30 shadow-sm" onclick="toggleAudio()">
+                        <i class="ph ph-speaker-high text-lg pointer-events-none"></i>
+                        <span data-i18n="audioPlay" class="pointer-events-none">語音導覽</span>
+                    </button>
+                    
+                    <div class="w-px h-6 bg-gray-300 dark:bg-gray-700"></div>
+
+                    <button type="button" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition" onclick="toggleLanguage()" title="Switch Language">
+                        <i class="ph ph-translate text-xl pointer-events-none"></i>
+                    </button>
+                    <button type="button" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+                        <i class="ph ph-moon text-xl pointer-events-none" id="theme-icon"></i>
+                    </button>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden flex items-center gap-3">
+                    <button id="btn-audio-mobile" type="button" class="p-2 rounded-full bg-blue-100 dark:bg-tech-800 text-blue-700 dark:text-tech-accent" onclick="toggleAudio()">
+                        <i class="ph ph-speaker-high text-xl pointer-events-none"></i>
+                    </button>
+                    <button type="button" class="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+                        <i class="ph ph-list text-2xl pointer-events-none"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden glass border-t border-gray-200 dark:border-gray-800 p-4 space-y-4">
+            <button type="button" class="w-full flex justify-center items-center gap-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800" onclick="navigateTo('intro'); document.getElementById('mobile-menu').classList.add('hidden')">
+                <i class="ph ph-book-open text-lg pointer-events-none"></i> <span data-i18n="navIntro" class="pointer-events-none">簡介</span>
+            </button>
+            <button type="button" class="w-full flex justify-center items-center gap-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800" onclick="navigateTo('team'); document.getElementById('mobile-menu').classList.add('hidden')">
+                <i class="ph ph-users text-lg pointer-events-none"></i> <span data-i18n="navTeam" class="pointer-events-none">團隊</span>
+            </button>
+            <button type="button" class="w-full flex justify-center items-center gap-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800" onclick="navigateTo('projects'); document.getElementById('mobile-menu').classList.add('hidden')">
+                <i class="ph ph-projector-screen text-lg pointer-events-none"></i> <span data-i18n="navProjects" class="pointer-events-none">專案</span>
+            </button>
+            <div class="w-full h-px bg-gray-200 dark:bg-gray-700"></div>
+            <button type="button" class="w-full flex justify-center items-center gap-2 p-2 rounded-md bg-gray-100 dark:bg-gray-800" onclick="toggleLanguage(); document.getElementById('mobile-menu').classList.add('hidden')">
+                <i class="ph ph-translate text-lg pointer-events-none"></i> <span data-i18n="mobileLang" class="pointer-events-none">切換至 English</span>
+            </button>
+            <button type="button" class="w-full flex justify-center items-center gap-2 p-2 rounded-md bg-gray-100 dark:bg-gray-800" onclick="toggleTheme(); document.getElementById('mobile-menu').classList.add('hidden')">
+                <i class="ph ph-palette text-lg pointer-events-none"></i> <span data-i18n="mobileTheme" class="pointer-events-none">切換深/淺色模式</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="relative z-10 pt-24 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        
+        <!-- Page: Home -->
+        <div id="page-home" class="page-section block">
+            <section class="mb-20 mt-10 text-center animate-fade-in-up">
+                <div class="inline-block px-4 py-1.5 rounded-full bg-blue-100 dark:bg-tech-800/50 border border-blue-200 dark:border-tech-accent/30 text-blue-700 dark:text-tech-accent text-sm font-semibold mb-6 tracking-widest">
+                    SPRING 2026
+                </div>
+                <h2 class="text-4xl md:text-5xl lg:text-7xl font-extrabold mb-4 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-cyan-500 dark:from-white dark:to-gray-400 pb-3 leading-[1.3] md:leading-[1.2]" data-i18n="courseTitle">
+                    國際策略管理
+                </h2>
+                <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-12 font-light max-w-3xl mx-auto" data-i18n="courseSubtitle">
+                    Strategic Management of Multinational Corporations (SMMC)
+                </p>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto mt-12 px-4">
+                    <button onclick="navigateTo('intro')" class="glass aspect-square flex flex-col items-center justify-center p-6 rounded-2xl tech-card group w-full">
+                        <i class="ph-fill ph-book-open text-6xl mb-6 text-blue-600 dark:text-tech-accent group-hover:-translate-y-2 transition-transform duration-300 pointer-events-none"></i>
+                        <h3 class="text-xl md:text-2xl font-bold dark:text-white pointer-events-none" data-i18n="cardIntro">課程簡介</h3>
+                    </button>
+                    <button onclick="navigateTo('team')" class="glass aspect-square flex flex-col items-center justify-center p-6 rounded-2xl tech-card group w-full">
+                        <i class="ph-fill ph-users-three text-6xl mb-6 text-blue-600 dark:text-tech-accent group-hover:-translate-y-2 transition-transform duration-300 pointer-events-none"></i>
+                        <h3 class="text-xl md:text-2xl font-bold dark:text-white pointer-events-none" data-i18n="cardTeam">課程團隊</h3>
+                    </button>
+                    <button onclick="navigateTo('projects')" class="glass aspect-square flex flex-col items-center justify-center p-6 rounded-2xl tech-card group w-full">
+                        <i class="ph-fill ph-projector-screen-chart text-6xl mb-6 text-blue-600 dark:text-tech-accent group-hover:-translate-y-2 transition-transform duration-300 pointer-events-none"></i>
+                        <h3 class="text-xl md:text-2xl font-bold dark:text-white pointer-events-none" data-i18n="cardProjects">專案清單</h3>
+                    </button>
+                </div>
+            </section>
+        </div>
+
+        <!-- Page: Intro -->
+        <div id="page-intro" class="page-section hidden">
+            <section class="mb-16">
+                <h3 class="text-2xl md:text-3xl font-bold mb-10 flex items-center gap-3 border-b border-gray-300 dark:border-gray-700 pb-4">
+                    <i class="ph-fill ph-book-open text-blue-600 dark:text-tech-accent"></i>
+                    <span data-i18n="cardIntro">課程簡介</span>
+                </h3>
+                
+                <div class="glass p-8 md:p-12 rounded-2xl shadow-sm dark:shadow-none mb-12">
+                    <div class="flex flex-col sm:flex-row gap-6 items-start text-left">
+                        <i class="ph-fill ph-quotes text-6xl text-gray-300 dark:text-gray-600 shrink-0"></i>
+                        <div class="space-y-6">
+                            <p class="text-lg md:text-xl text-gray-700 dark:text-gray-200 leading-[1.8] font-medium" data-i18n="courseDesc">
+                                「兼具跨領域與多元場域、以問題解決與行動為導向、線上與實體串聯實踐，以『雙域、雙向、雙網合一』模式，徹底翻轉教室的互動學習。」
+                            </p>
+                            <p class="text-gray-600 dark:text-gray-400 leading-relaxed border-l-4 border-blue-500 dark:border-tech-accent pl-4" data-i18n="courseObj">
+                                本課程為商管領域之最終標竿課程 (Capstone Course)。目標在於建立學生對於國際企業經營上所應具備之策略思維、邏輯與分析手法。我們強調從「決策者角度」出發，培養產業競爭動態分析與企業資源能耐評估的實戰能力。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+                    <div class="glass p-6 rounded-2xl tech-card group">
+                        <div class="w-12 h-12 bg-blue-100 dark:bg-tech-800 text-blue-600 dark:text-tech-accent rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                            <i class="ph ph-strategy"></i>
+                        </div>
+                        <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-2" data-i18n="pillar1Title">決策思維 (Strategic Thinking)</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400" data-i18n="pillar1Desc">從高階決策者角度，理解企業如何在複雜的全球競爭與動態合作網絡中，創造並獲取獨特價值。</p>
+                    </div>
+                    <div class="glass p-6 rounded-2xl tech-card group">
+                        <div class="w-12 h-12 bg-purple-100 dark:bg-tech-800 text-purple-600 dark:text-tech-accent rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                            <i class="ph ph-chart-bar"></i>
+                        </div>
+                        <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-2" data-i18n="pillar2Title">實證分析 (Evidence-Based Analysis)</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400" data-i18n="pillar2Desc">結合產業報告、財務數據庫、公開資訊與嚴謹的策略架構，進行深度的企業資源與產業結構分析。</p>
+                    </div>
+                    <div class="glass p-6 rounded-2xl tech-card group">
+                        <div class="w-12 h-12 bg-cyan-100 dark:bg-tech-800 text-cyan-600 dark:text-tech-accent rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                            <i class="ph ph-magic-wand"></i>
+                        </div>
+                        <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-2" data-i18n="pillar3Title">AI 互動專案 (AI-Enhanced Project)</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400" data-i18n="pillar3Desc">運用 AI 工具輔助情報蒐集與內容生成，最終將學習成果轉化為可互動、可分享的期末網頁專題。</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Learning Journey 區塊 -->
+            <section class="mb-24">
+                <div class="text-center mb-12">
+                    <div class="inline-flex items-center justify-center gap-2 px-4 py-1.5 rounded-full bg-blue-100/50 dark:bg-tech-800/30 text-blue-600 dark:text-tech-accent text-xs font-bold tracking-wider uppercase mb-4 border border-blue-200 dark:border-tech-accent/20">
+                        <i class="ph-fill ph-path"></i> Learning Process
+                    </div>
+                    <h3 class="text-2xl md:text-3xl font-bold mb-4 dark:text-white" data-i18n="journeyTitle">
+                        Learning Journey｜策略學習路徑
+                    </h3>
+                    <p class="max-w-3xl mx-auto text-gray-600 dark:text-gray-400" data-i18n="journeyDesc">
+                        本課程從策略概念出發，逐步引導學生進行產業分析、內部資源評估與成長策略規劃，建立理解企業如何創造並維持競爭優勢的完整分析框架。
+                    </p>
+                </div>
+
+                <div class="relative max-w-7xl mx-auto px-4 sm:px-0">
+                    <div class="hidden lg:block absolute top-[4.5rem] left-[10%] right-[10%] h-1 bg-gradient-to-r from-blue-300 via-cyan-400 to-purple-400 dark:from-blue-600 dark:via-tech-accent dark:to-purple-600 opacity-30 z-0"></div>
+                    <div class="block lg:hidden absolute top-8 bottom-8 left-[2.25rem] w-1 bg-gradient-to-b from-blue-300 via-cyan-400 to-purple-400 dark:from-blue-600 dark:via-tech-accent dark:to-purple-600 opacity-30 z-0"></div>
+
+                    <div class="flex flex-col lg:grid lg:grid-cols-4 gap-8 lg:gap-6 relative z-10">
+                        <!-- Stage 1 -->
+                        <div class="glass p-6 rounded-2xl flex flex-col h-full relative group hover:-translate-y-2 transition-transform duration-300">
+                            <div class="block lg:hidden absolute left-[-0.7rem] top-6 w-4 h-4 rounded-full bg-blue-500 border-2 border-white dark:border-tech-900 shadow-md"></div>
+                            <div class="w-14 h-14 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-center text-3xl text-blue-500 dark:text-tech-accent mb-5 mx-auto lg:mx-0 group-hover:scale-110 transition-transform">
+                                <i class="ph-fill ph-compass"></i>
+                            </div>
+                            <div class="text-center lg:text-left mb-4">
+                                <span class="text-xs font-bold text-gray-400 dark:text-gray-500 tracking-widest uppercase block mb-1">Learn</span>
+                                <h4 class="text-lg font-bold text-gray-900 dark:text-white leading-tight" data-i18n="journeyStage1EN">Strategy Foundation</h4>
+                                <h5 class="text-sm font-medium text-gray-500 dark:text-gray-400 mt-0.5" data-i18n="journeyStage1ZH">策略基礎</h5>
+                            </div>
+                            <div class="inline-block px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-[10px] font-mono text-gray-500 dark:text-gray-400 w-fit mb-3 mx-auto lg:mx-0 border border-gray-200 dark:border-gray-700">
+                                LN1 - LN2
+                            </div>
+                            <p class="text-sm text-gray-700 dark:text-gray-300 font-medium mb-4 flex-grow italic" data-i18n="journeyQ1">
+                                「這家公司如何創造價值？它的商業模式與策略邏輯是什麼？」
+                            </p>
+                            <div class="mt-auto bg-blue-50/50 dark:bg-tech-800/50 p-3 rounded-lg border border-blue-100/50 dark:border-tech-700/50">
+                                <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed" data-i18n="journeyTP1">
+                                    <strong class="text-blue-700 dark:text-tech-accent block mb-1">TP0 認識公司</strong>
+                                    包含公司基本資料、營運範疇、產品服務、願景使命、近五年經營績效與重大新聞。
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Stage 2 -->
+                        <div class="glass p-6 rounded-2xl flex flex-col h-full relative group hover:-translate-y-2 transition-transform duration-300">
+                            <div class="block lg:hidden absolute left-[-0.7rem] top-6 w-4 h-4 rounded-full bg-cyan-500 border-2 border-white dark:border-tech-900 shadow-md"></div>
+                            <div class="w-14 h-14 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-center text-3xl text-cyan-500 dark:text-tech-accent mb-5 mx-auto lg:mx-0 group-hover:scale-110 transition-transform">
+                                <i class="ph-fill ph-network"></i>
+                            </div>
+                            <div class="text-center lg:text-left mb-4">
+                                <span class="text-xs font-bold text-gray-400 dark:text-gray-500 tracking-widest uppercase block mb-1">Analyze</span>
+                                <h4 class="text-lg font-bold text-gray-900 dark:text-white leading-tight" data-i18n="journeyStage2EN">External Analysis</h4>
+                                <h5 class="text-sm font-medium text-gray-500 dark:text-gray-400 mt-0.5" data-i18n="journeyStage2ZH">外部環境與產業分析</h5>
+                            </div>
+                            <div class="inline-block px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-[10px] font-mono text-gray-500 dark:text-gray-400 w-fit mb-3 mx-auto lg:mx-0 border border-gray-200 dark:border-gray-700">
+                                LN3 - LN4
+                            </div>
+                            <p class="text-sm text-gray-700 dark:text-gray-300 font-medium mb-4 flex-grow italic" data-i18n="journeyQ2">
+                                「這個產業是否具有吸引力？競爭者、合作夥伴與產業價值鏈如何影響企業獲利？」
+                            </p>
+                            <div class="mt-auto bg-blue-50/50 dark:bg-tech-800/50 p-3 rounded-lg border border-blue-100/50 dark:border-tech-700/50">
+                                <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed" data-i18n="journeyTP2">
+                                    <strong class="text-cyan-600 dark:text-cyan-400 block mb-1">TP1 外部與產業分析</strong>
+                                    包含產業疆界、供需情況、產業鏈、產品生命週期、外部環境、產業結構與競爭分析。
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Stage 3 -->
+                        <div class="glass p-6 rounded-2xl flex flex-col h-full relative group hover:-translate-y-2 transition-transform duration-300">
+                            <div class="block lg:hidden absolute left-[-0.7rem] top-6 w-4 h-4 rounded-full bg-indigo-500 border-2 border-white dark:border-tech-900 shadow-md"></div>
+                            <div class="w-14 h-14 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-center text-3xl text-indigo-500 dark:text-indigo-400 mb-5 mx-auto lg:mx-0 group-hover:scale-110 transition-transform">
+                                <i class="ph-fill ph-cube"></i>
+                            </div>
+                            <div class="text-center lg:text-left mb-4">
+                                <span class="text-xs font-bold text-gray-400 dark:text-gray-500 tracking-widest uppercase block mb-1">Position</span>
+                                <h4 class="text-lg font-bold text-gray-900 dark:text-white leading-tight" data-i18n="journeyStage3EN">Internal Advantage</h4>
+                                <h5 class="text-sm font-medium text-gray-500 dark:text-gray-400 mt-0.5" data-i18n="journeyStage3ZH">內部資源與競爭優勢</h5>
+                            </div>
+                            <div class="inline-block px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-[10px] font-mono text-gray-500 dark:text-gray-400 w-fit mb-3 mx-auto lg:mx-0 border border-gray-200 dark:border-gray-700">
+                                LN5 - LN7
+                            </div>
+                            <p class="text-sm text-gray-700 dark:text-gray-300 font-medium mb-4 flex-grow italic" data-i18n="journeyQ3">
+                                「企業擁有哪些資源與能力？它如何形成競爭優勢並選擇適合的競爭定位？」
+                            </p>
+                            <div class="mt-auto bg-blue-50/50 dark:bg-tech-800/50 p-3 rounded-lg border border-blue-100/50 dark:border-tech-700/50">
+                                <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed" data-i18n="journeyTP3">
+                                    <strong class="text-indigo-600 dark:text-indigo-400 block mb-1">TP2 內部資源評估</strong>
+                                    包含商業模式、策略活動系統、價值鏈、組織架構、有形無形資源與核心能耐。
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Stage 4 -->
+                        <div class="glass p-6 rounded-2xl flex flex-col h-full relative group hover:-translate-y-2 transition-transform duration-300">
+                            <div class="block lg:hidden absolute left-[-0.7rem] top-6 w-4 h-4 rounded-full bg-purple-500 border-2 border-white dark:border-tech-900 shadow-md"></div>
+                            <div class="w-14 h-14 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-center text-3xl text-purple-500 dark:text-purple-400 mb-5 mx-auto lg:mx-0 group-hover:scale-110 transition-transform">
+                                <i class="ph-fill ph-rocket-launch"></i>
+                            </div>
+                            <div class="text-center lg:text-left mb-4">
+                                <span class="text-xs font-bold text-gray-400 dark:text-gray-500 tracking-widest uppercase block mb-1">Grow</span>
+                                <h4 class="text-lg font-bold text-gray-900 dark:text-white leading-tight" data-i18n="journeyStage4EN">Growth & Renewal</h4>
+                                <h5 class="text-sm font-medium text-gray-500 dark:text-gray-400 mt-0.5" data-i18n="journeyStage4ZH">成長、創新與策略轉型</h5>
+                            </div>
+                            <div class="inline-block px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-[10px] font-mono text-gray-500 dark:text-gray-400 w-fit mb-3 mx-auto lg:mx-0 border border-gray-200 dark:border-gray-700">
+                                LN8 - LN12
+                            </div>
+                            <p class="text-sm text-gray-700 dark:text-gray-300 font-medium mb-4 flex-grow italic" data-i18n="journeyQ4">
+                                「企業如何透過創新、整合、多角化、國際化、聯盟或併購來維持成長與永續發展？」
+                            </p>
+                            <div class="mt-auto bg-blue-50/50 dark:bg-tech-800/50 p-3 rounded-lg border border-blue-100/50 dark:border-tech-700/50">
+                                <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed" data-i18n="journeyTP4">
+                                    <strong class="text-purple-600 dark:text-purple-400 block mb-1">TP3 未來成長與永續發展</strong>
+                                    分析企業近期的策略革新、創新轉型、垂直整合、多角化與國際化布局。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 課程資源入口 (放在課程簡介最下方) -->
+            <section class="mb-10 max-w-5xl mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                    <!-- 教材卡片 -->
+                    <div class="glass p-8 rounded-2xl flex flex-col border border-gray-200 dark:border-gray-700 hover:border-blue-500/50 dark:hover:border-blue-400/50 transition-colors h-full">
+                        <div class="w-12 h-12 bg-gray-100 dark:bg-gray-800 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center text-2xl mb-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                            <i class="ph-fill ph-book-open"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-gray-900 dark:text-white mb-3" data-i18n="linkTextbookTitle">教材與參考書</h4>
+                        <!-- 修改此處：確保文字長度不一也能把按鈕推到底部 -->
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-8 flex-grow" data-i18n="linkTextbookSub">查看本課程使用的核心教材、參考書目與策略管理學習資源。</p>
+                        <a href="https://lolopodcast.github.io/SMMC-EMI-Textbook-Web/" target="_blank" rel="noopener noreferrer" class="w-full text-center py-2.5 rounded-lg bg-blue-50/50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium text-sm hover:bg-blue-100 dark:hover:bg-blue-900/40 border border-blue-200 dark:border-blue-800 transition-colors">
+                            <span data-i18n="linkTextbookBtn">查看教材 →</span>
+                        </a>
+                    </div>
+
+                    <!-- Hub 卡片 -->
+                    <div class="glass p-8 rounded-2xl flex flex-col border border-gray-200 dark:border-gray-700 hover:border-purple-500/50 dark:hover:border-purple-400/50 transition-colors h-full">
+                        <div class="w-12 h-12 bg-gray-100 dark:bg-gray-800 text-purple-600 dark:text-purple-400 rounded-xl flex items-center justify-center text-2xl mb-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                            <i class="ph-fill ph-lock-key"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-gray-900 dark:text-white mb-3" data-i18n="linkHubTitle">課程專區</h4>
+                        <!-- 修改此處：確保文字長度不一也能把按鈕推到底部 -->
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-8 flex-grow" data-i18n="linkHubSub">進入密碼保護的課程資源區，查看專案連結、學習資料與相關內容。</p>
+                        <a href="https://lolopodcast.github.io/SMMC-Executive-Hub/" target="_blank" rel="noopener noreferrer" class="w-full text-center py-2.5 rounded-lg bg-purple-50/50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 font-medium text-sm hover:bg-purple-100 dark:hover:bg-purple-900/40 border border-purple-200 dark:border-purple-800 transition-colors">
+                            <span data-i18n="linkHubBtn">進入專區 →</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 密碼提示小字 (置中於兩卡片下方) -->
+                <div class="text-center">
+                    <span class="text-[13px] text-gray-500 dark:text-gray-400 inline-flex items-center gap-1.5">
+                        <i class="ph-fill ph-info"></i>
+                        <span data-i18n="hubNote">修課同學請至Moodle查看密碼；若為訪客請寄信至原著作者 駱世民教授。</span>
+                    </span>
+                </div>
+            </section>
+        </div>
+
+        <!-- Page: Team -->
+        <div id="page-team" class="page-section hidden">
+            <section class="mb-24 relative">
+                <div class="flex justify-between items-end mb-10 border-b border-gray-300 dark:border-gray-700 pb-4">
+                    <h3 class="text-2xl md:text-3xl font-bold flex items-center gap-3">
+                        <i class="ph-fill ph-users-three text-blue-600 dark:text-tech-accent"></i>
+                        <span data-i18n="teamTitle">課程團隊</span>
+                    </h3>
+                    <span class="text-sm text-gray-500 hidden sm:inline-block"><i class="ph ph-hand-tap"></i> 點擊卡片查看簡歷</span>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="glass rounded-xl p-6 flex flex-col items-center text-center tech-card group" onclick="openModal('mei')">
+                        <img src="https://drive.google.com/thumbnail?id=19Zb5wVObY10ddLMFz_ZLriAq0G5WNVJD&sz=w400" alt="Prof. Katie Mei" class="w-24 h-24 rounded-full object-cover object-center shadow-lg mb-4 group-hover:scale-105 transition-transform border-4 border-white dark:border-gray-800" onerror="this.src='https://ui-avatars.com/api/?name=筱珍+梅&background=0D8ABC&color=fff'">
+                        <h4 class="text-xl font-bold dark:text-white" data-i18n="prof1">梅筱珍 教授</h4>
+                        <p class="text-sm text-blue-600 dark:text-tech-accent mt-1" data-i18n="roleProf">授課教師</p>
+                        <div class="mt-3 text-xs text-gray-500 transition flex items-center gap-1 cursor-pointer">
+                            <i class="ph ph-envelope-simple pointer-events-none"></i> katiemhc@gmail.com
+                        </div>
+                    </div>
+                    <div class="glass rounded-xl p-6 flex flex-col items-center text-center tech-card group" onclick="openModal('lo')">
+                        <img src="https://drive.google.com/thumbnail?id=1beZuOAgu3EMRXWj49wDyakp1V7Xa-UvT&sz=w400" alt="Prof. Luo" class="w-24 h-24 rounded-full object-cover object-center shadow-lg mb-4 group-hover:scale-105 transition-transform border-4 border-white dark:border-gray-800" onerror="this.src='https://ui-avatars.com/api/?name=世民+駱&background=0D8ABC&color=fff'">
+                        <h4 class="text-xl font-bold dark:text-white" data-i18n="prof2">駱世民 教授</h4>
+                        <p class="text-sm text-blue-600 dark:text-tech-accent mt-1" data-i18n="roleProf">授課教師</p>
+                        <div class="mt-3 text-xs text-gray-500 transition flex items-center gap-1 cursor-pointer">
+                            <i class="ph ph-envelope-simple pointer-events-none"></i> smlo@ncnu.edu.tw
+                        </div>
+                    </div>
+                    <div class="glass rounded-xl p-6 flex flex-col items-center text-center tech-card group" onclick="openModal('dai')">
+                        <img src="https://drive.google.com/thumbnail?id=11YYqACVFGZr9LnmZ-iRIJHDC2drhqZn2&sz=w400" alt="TA Dai" class="w-24 h-24 rounded-full object-cover object-center shadow-lg mb-4 group-hover:scale-105 transition-transform border-4 border-white dark:border-gray-800" onerror="this.src='https://ui-avatars.com/api/?name=子然+戴&background=475569&color=fff'">
+                        <h4 class="text-xl font-bold dark:text-white" data-i18n="ta1">戴子然 助教</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1" data-i18n="roleTA">教學助理</p>
+                        <div class="mt-3 text-xs text-gray-500 transition flex items-center gap-1 cursor-pointer">
+                            <i class="ph ph-envelope-simple pointer-events-none"></i> dzzrabbit@gmail.com
+                        </div>
+                    </div>
+                    <div class="glass rounded-xl p-6 flex flex-col items-center text-center tech-card group" onclick="openModal('wang')">
+                        <img src="https://drive.google.com/thumbnail?id=1oVe4oME56QcvE6q8V0DJFaibzme58oOX&sz=w400" alt="TA Wang" class="w-24 h-24 rounded-full object-cover object-center shadow-lg mb-4 group-hover:scale-105 transition-transform border-4 border-white dark:border-gray-800" onerror="this.src='https://ui-avatars.com/api/?name=毓翰+王&background=475569&color=fff'">
+                        <h4 class="text-xl font-bold dark:text-white" data-i18n="ta2">王毓翰 助教</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1" data-i18n="roleTA">教學助理</p>
+                        <div class="mt-3 text-xs text-gray-500 transition flex items-center gap-1 cursor-pointer">
+                            <i class="ph ph-envelope-simple pointer-events-none"></i> hank940121@gmail.com
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Page: Projects -->
+        <div id="page-projects" class="page-section hidden">
+            <section id="projects-section">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 border-b border-gray-300 dark:border-gray-700 pb-4 gap-4">
+                    <h3 class="text-2xl md:text-3xl font-bold flex items-center gap-3">
+                        <i class="ph-fill ph-projector-screen-chart text-blue-600 dark:text-tech-accent"></i>
+                        <span data-i18n="projectsTitle">小組 TP 專案清單</span>
+                    </h3>
+                    <div class="flex items-center gap-3 w-full md:w-auto">
+                        <a href="https://forms.gle/Ts18mCiQ8ZgwNQjCA" target="_blank" rel="noopener noreferrer" class="flex-grow md:flex-grow-0 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-tech-700 dark:hover:bg-tech-600 text-white rounded-lg text-sm font-medium transition-colors shadow-sm whitespace-nowrap z-50 relative">
+                            <i class="ph ph-clipboard-text text-lg pointer-events-none"></i>
+                            <span data-i18n="peerGrading" class="pointer-events-none">修課同學互評表</span>
+                        </a>
+                        <span class="text-sm font-medium text-gray-500 bg-gray-200 dark:bg-gray-800 px-3 py-2 rounded-lg hidden sm:inline-block whitespace-nowrap">11 Teams</span>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-2 mb-8 relative z-50">
+                    <button type="button" class="filter-btn px-4 py-1.5 rounded-full text-sm font-medium transition-colors bg-blue-600 text-white dark:bg-tech-accent dark:text-tech-900 shadow-sm" onclick="filterProjects('ALL', this)" data-i18n="filterAll">All / 所有組別</button>
+                    <button type="button" class="filter-btn px-4 py-1.5 rounded-full text-sm font-medium transition-colors bg-white dark:bg-tech-800 text-gray-600 dark:text-gray-300 hover:bg-blue-50 border border-gray-200 dark:border-gray-700 shadow-sm" onclick="filterProjects('A', this)" data-i18n="filterA">半導體：製造與記憶體</button>
+                    <button type="button" class="filter-btn px-4 py-1.5 rounded-full text-sm font-medium transition-colors bg-white dark:bg-tech-800 text-gray-600 dark:text-gray-300 hover:bg-blue-50 border border-gray-200 dark:border-gray-700 shadow-sm" onclick="filterProjects('B', this)" data-i18n="filterB">半導體：設計與封測</button>
+                    <button type="button" class="filter-btn px-4 py-1.5 rounded-full text-sm font-medium transition-colors bg-white dark:bg-tech-800 text-gray-600 dark:text-gray-300 hover:bg-blue-50 border border-gray-200 dark:border-gray-700 shadow-sm" onclick="filterProjects('C', this)" data-i18n="filterC">電腦與周邊系統</button>
+                    <button type="button" class="filter-btn px-4 py-1.5 rounded-full text-sm font-medium transition-colors bg-white dark:bg-tech-800 text-gray-600 dark:text-gray-300 hover:bg-blue-50 border border-gray-200 dark:border-gray-700 shadow-sm" onclick="filterProjects('D', this)" data-i18n="filterD">其他產業</button>
+                </div>
+
+                <div class="glass p-6 md:p-8 rounded-2xl mb-10 shadow-sm border-l-4 border-l-blue-500 dark:border-l-tech-accent">
+                    <h4 class="text-lg md:text-xl font-bold mb-3 text-gray-900 dark:text-white flex items-center gap-2">
+                        <i class="ph ph-lightbulb text-xl text-blue-600 dark:text-tech-accent"></i>
+                        <span data-i18n="logicTitle">TP 公司選擇邏輯</span>
+                    </h4>
+                    <div class="space-y-4 text-sm md:text-base text-gray-600 dark:text-gray-300 leading-relaxed">
+                        <p data-i18n="logicP1">從台灣製造業出發，理解企業如何在全球競爭中創造策略價值。本課程的 TP 公司選擇以製造業為核心，聚焦於半導體、人工智慧、電動車、自動化、電子代工、生技與精密機械等關鍵產業。各組選擇的企業不只是個案分析對象，更是觀察台灣企業如何面對全球競爭、技術轉型、永續發展與產業升級的重要窗口。</p>
+                        <p data-i18n="logicP2">透過互動式網頁專題，各組將企業資料、產業分析、策略思維與 AI 工具應用整合呈現，讓學習成果不只停留在課堂報告，而能轉化為可被瀏覽、分享與討論的策略學習作品。</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 relative z-10" id="projects-container">
+                    <!-- Dynamic Loading -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Modal System -->
+    <div id="modal-overlay" class="fixed inset-0 bg-gray-900/60 dark:bg-black/80 backdrop-blur-sm z-[100] modal-closed flex items-center justify-center p-4 sm:p-6 transition-all duration-300" onclick="closeModal()">
+        <div id="modal-content" class="bg-white dark:bg-tech-800 w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-tech-900">
+                <h3 class="font-bold text-lg dark:text-white flex items-center gap-2"><i class="ph-fill ph-identification-card text-blue-600 dark:text-tech-accent"></i> <span data-i18n="profileTitle">Profile / 團隊簡歷</span></h3>
+                <button type="button" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition" onclick="closeModal()">
+                    <i class="ph ph-x text-xl dark:text-gray-300 pointer-events-none"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto" id="modal-body">
+                <!-- Content injected dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Toast -->
+    <div id="custom-toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 px-6 py-3 rounded-full shadow-2xl z-[200] transition-all duration-300 opacity-0 transform translate-y-4 text-sm font-medium whitespace-nowrap pointer-events-none">
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-tech-900/50 backdrop-blur-md py-10 mt-20 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            
+            <p class="text-gray-500 dark:text-gray-400 font-medium relative z-50">
+                © 2026 SMMC 1142 | <span data-i18n="footerText">互動式學習網頁競賽</span>
+            </p>
+            <p class="text-xs text-gray-400 mt-2 relative z-50">Built for Strategic Thinking, AI-Enhanced Analysis, and Interactive Learning</p>
+            
+            <div class="mt-4 flex flex-wrap justify-center gap-4 text-sm text-gray-500 dark:text-gray-400 font-medium relative z-50">
+                <a href="https://www.ibs.ncnu.edu.tw/index.php/en-us/" target="_blank" rel="noopener noreferrer" class="hover:text-blue-600 dark:hover:text-tech-accent transition">IBS Department</a>
+                <span class="opacity-50">|</span>
+                <a href="https://bba.ncnu.edu.tw/" target="_blank" rel="noopener noreferrer" class="hover:text-blue-600 dark:hover:text-tech-accent transition">IPCM Department</a>
+                <span class="opacity-50">|</span>
+                <a href="https://www.ncnu.edu.tw/" target="_blank" rel="noopener noreferrer" class="hover:text-blue-600 dark:hover:text-tech-accent transition">NCNU</a>
+            </div>
+
+            <div class="mt-6 text-xs font-mono text-gray-400/70 tracking-widest uppercase">
+                Version 2.8.0
+            </div>
+        </div>
+    </footer>
+
+    <!-- Application Logic -->
+    <script>
+        const projects = [
+            { id: "G1", zh: "緯創", en: "Wistron", category: "C", icon: "ph-desktop", website: "https://www.wits.com/tw/", finance: "https://tw.stock.yahoo.com/quote/3231.TW/technical-analysis", logo: "https://drive.google.com/file/d/1kw9qvT77owkjKWc6QpS2u3VLTBbJqtBH/view", projectUrl: "https://shirley09010120-ux.github.io/wistron-G1-./" },
+            { id: "G2", zh: "華邦電", en: "Winbond", category: "A", icon: "ph-cpu", website: "https://www.winbond.com/hq/?__locale=zh_TW", finance: "https://tw.stock.yahoo.com/quote/2344.TW/technical-analysis", logo: "https://drive.google.com/file/d/1PR5-leDZfERgEdrFxHzjhWLf6EQ4aDAX/view", projectUrl: "https://lingwu531.github.io/winbond.web/" },
+            { id: "G3", zh: "台積電", en: "tsmc", category: "A", icon: "", website: "https://www.tsmc.com/chinese", finance: "https://tw.stock.yahoo.com/quote/2330.TW/technical-analysis", logo: "https://drive.google.com/file/d/1ozbkDfnJEroN4_ZIJDPanQi67Z3nCwmB/view", projectUrl: "https://a-lanca.github.io/group3_tsmc_termproject/" },
+            { id: "G4", zh: "日月光", en: "ASE", category: "B", icon: "ph-circuitry", website: "https://ase.aseglobal.com/ch/", finance: "https://tw.stock.yahoo.com/quote/3711.TW/technical-analysis", logo: "https://drive.google.com/file/d/1ArtuD74-pTXLHOzFxlX1BGvMCam5foZk/view", projectUrl: "https://chenliz9459.github.io/g4website/" },
+            { id: "G5", zh: "鴻海", en: "Foxconn", category: "C", icon: "ph-factory", website: "https://www.foxconn.com/zh-tw", finance: "https://tw.stock.yahoo.com/quote/2317.TW/technical-analysis", logo: "https://drive.google.com/file/d/1Y8PKpKv-Ed7WNitzKSVFQg1j623Ffluf/view", projectUrl: "https://yun963943-design.github.io/0511SMMC_FOXCONN/" },
+            { id: "G6", zh: "南亞科", en: "Nanya Tech", category: "A", icon: "ph-memory", website: "https://www.nanya.com/tw/", finance: "https://tw.stock.yahoo.com/quote/2408.TW/technical-analysis", logo: "https://drive.google.com/file/d/15Ap35oZL8Q5xcXZ4R4HwXGCxD7OYNIXu/view", projectUrl: "https://novoicefire.github.io/SMMCTP0/" },
+            { id: "G7", zh: "台達電", en: "Delta", category: "C", icon: "ph-lightning", website: "https://www.deltaww.com/zh-TW/index", finance: "https://tw.stock.yahoo.com/quote/2308.TW/technical-analysis", logo: "https://drive.google.com/file/d/1OwvxfUXDCABiYs5IJvFO6HJf1mjc-I3_/view", projectUrl: "https://jessica5520119-cmyk.github.io/SMMC_G7_DELTA_Interactive-Webpage-Competition/" },
+            { id: "G8", zh: "合一生技", en: "Oneness Biotech", category: "D", icon: "ph-flask", website: "https://onenessbio.com/", finance: "https://tw.stock.yahoo.com/quote/4743.TWO/technical-analysis", logo: "https://drive.google.com/file/d/1WL2x3-8UP9oWpoVonUJOFwNSDEqBckDE/view", projectUrl: "https://moodle.ncnu.edu.tw/mod/forum/discuss.php?d=25181" },
+            { id: "G9", zh: "上銀科技", en: "HIWIN", category: "D", icon: "ph-robot", website: "https://www.hiwin.tw/", finance: "https://tw.stock.yahoo.com/quote/2049.TW/technical-analysis", logo: "https://drive.google.com/file/d/1Nsdb2oDt0CED3cbldSbgBNhSXTl_QW3o/view", projectUrl: "https://paullai1102-creator.github.io/0511G9TP0/" },
+            { id: "G10", zh: "聯華電子", en: "UMC", category: "A", icon: "ph-hard-drives", website: "https://www.umc.com/zh-TW/home/Index", finance: "https://tw.stock.yahoo.com/quote/2303.TW/technical-analysis", logo: "https://drive.google.com/file/d/1eS4YBRp6XUupjDVBvybXeBRLN6lO8tVo/view", projectUrl: "https://s112212022-stack.github.io/G10TP/" },
+            { id: "G11", zh: "聯發科", en: "MediaTek", category: "B", icon: "ph-wifi-high", website: "https://www.mediatek.com/zh-tw/", finance: "https://tw.stock.yahoo.com/quote/2454.TW/technical-analysis", logo: "https://drive.google.com/file/d/1ffA8b5cwN2Q19hWHt9GGMYXfllzpNr78/view", projectUrl: "https://tim1218ok.github.io/G11/" }
+        ];
+
+        const resumes = {
+            mei: {
+                img: "19Zb5wVObY10ddLMFz_ZLriAq0G5WNVJD",
+                zh: {
+                    name: "梅筱珍 教授", title: "國立暨南國際大學 兼任教授級專業技術人員",
+                    edu: "國立暨南國際大學 國際企業學系博士",
+                    curr: [
+                        "國立暨南國際大學國際企業學系兼任教授級專業技術人員 (114/08/01~)",
+                        "上博科技(股)公司副總兼營運長 (114/6/26-迄今)",
+                        "華德動能科技(股)公司獨立董事 (109/6/22-迄今)"
+                    ],
+                    exp: [
+                        "國立暨南國際大學國際企業學系兼任助理教授 (104/08/01-113/07/31)",
+                        "上博科技(股)公司董事 (114/10/16-115/03/24) / 監察人 (111/11-114/10)",
+                        "宇明泰化工(股)公司顧問 (106/03-114/?)",
+                        "財團法人中衛發展中心創新製造部副總經理 (104/07/01-106/01/31)",
+                        "財團法人精密機械研究發展中心協理、組長、經理、管理師 (86/03/05-104/06/30)",
+                        "財團法人車輛研究測試中心課長、工程師 (83/05-86/02)",
+                        "美成食品工業股份有限公司行銷企劃專員 (81/07-83/04)"
+                    ]
+                },
+                en: {
+                    name: "Katie Mei, Ph.D.", title: "Professor-level Professional Specialist (Adjunct)",
+                    edu: "Ph.D., Department of International Business Studies, NCNU",
+                    curr: [
+                        "Professor-level Professional Specialist (Adjunct), Dept. of IBS, NCNU (Aug 2025–Present)",
+                        "Vice President and COO, CIMFORCE International Limited (Jun 2025–Present)",
+                        "Independent Director, RAC Electric Vehicles Inc. (Jun 2020–Present)"
+                    ],
+                    exp: [
+                        "Adjunct Assistant Professor, Dept. of IBS, NCNU (Aug 2015–Jul 2024)",
+                        "Director & Supervisor, CIMFORCE International Limited (Nov 2022–Mar 2026)",
+                        "Consultant, YEU MING TAI CHEMICAL INDUSTRIAL CO., LTD. (Mar 2017–2025)",
+                        "Deputy GM, Innovation Manufacturing Dept., Corporate Synergy Development Center (Jul 2015–Jan 2017)",
+                        "Assistant VP, Section Chief, Manager, Precision Machinery R&D Center (Mar 1997–Jun 2015)",
+                        "Section Chief and Engineer, Automotive Research & Testing Center (May 1994–Feb 1997)",
+                        "Marketing Planning Specialist, Mei Cheng Food Industrial Co., Ltd. (Jul 1992–Apr 1994)"
+                    ]
+                }
+            },
+            lo: {
+                img: "1beZuOAgu3EMRXWj49wDyakp1V7Xa-UvT",
+                zh: {
+                    name: "駱世民 教授", title: "國立暨南國際大學 專任教授",
+                    edu: "國立台灣大學 國際企業學系博士 / 機械工程學系碩、學士",
+                    curr: [
+                        "現任－國立暨南國際大學國際企業學系專任教授",
+                        "兼任臺師大 EMBA、中山大學 EMI 全英教學中心顧問教師",
+                        "榮獲－四度全校教學獎、兩次導師獎、多次傑出 TA 指導教授、彈性薪資獎勵、PBL 問題導向學習主持人"
+                    ],
+                    exp: [
+                        "開設－國際策略管理(EMI)、競合動態與平台策略(EMI)、商業與時事分析(EMI) 等",
+                        "研究領域－國際企業經營策略、產業與競爭分析、創新與創業管理、平台商業模式",
+                        "曾任－科技部 台灣智慧製造創新營運中心計劃 高級顧問",
+                        "曾任－國衛院 高齡健康與長照研究中心計劃 研議委員",
+                        "海內外 高科技、精密機械、通路零售、電商平台等企業組織 諮詢輔導",
+                        "台灣上市櫃公司 董事、獨立董事 / 多次參與 新創事業, 創業、募資、投資",
+                        "曾任－年營收五百億台灣上市公司, 產品企劃處、模組研發處 處長",
+                        "麻省理工學院史隆管理學院、華盛頓大學西雅圖分校、加州大學聖地牙哥分校 等研習"
+                    ]
+                },
+                en: {
+                    name: "Shihmin Lo, Ph.D.", title: "Professor, Department of International Business Studies",
+                    edu: "Ph.D. in Strategic Management, NTU / M.S. & B.S. in Mechanical Engineering, NTU",
+                    curr: [
+                        "Professor at the Department of International Business Studies, College of Management, NCNU.",
+                        "He previously directed the Center for Case Learning and Development and has been leading the university's initiatives on PBL, EMI, and Teaching Innovations.",
+                        "Professor Lo has been the recipient of numerous teaching excellence awards at NCNU."
+                    ],
+                    exp: [
+                        "His research interests lie in strategy, management, and leadership, with a focus on platform business models, organizational learning, and entrepreneurship.",
+                        "He has served on many advisory and reviewer boards for government projects on industrial development and business venturing.",
+                        "Prior to his academic career, Professor Lo held various executive management, business development, and engineering design positions in high-tech industries in Taiwan.",
+                        "He has also worked as a consultant and board director of publicly listed companies, as well as founding and funding start-ups.",
+                        "Visiting scholar in UCSD, ASU, MIT Sloan, UW, among others."
+                    ]
+                }
+            },
+            dai: {
+                img: "11YYqACVFGZr9LnmZ-iRIJHDC2drhqZn2",
+                zh: {
+                    name: "戴子然", title: "課程教學助理 / 現役研究生",
+                    edu: "現役碩士班研究生",
+                    curr: [
+                        "國際策略管理與商業時事分析 (全英授課) TA"
+                    ],
+                    exp: [
+                        "前新興產業趨勢與商業模式 TA",
+                        "前社團博覽會總召",
+                        "前暨大附中影視動漫社指導老師"
+                    ]
+                },
+                en: {
+                    name: "Jan Tai", title: "Teaching Assistant / Master Student",
+                    edu: "Current Master Student",
+                    curr: [
+                        "EMI Teaching Assistant, Strategic Management of Multinational Corporations, Business News and Analysis"
+                    ],
+                    exp: [
+                        "Former Teaching Assistant, Industry Trends and Business Model",
+                        "Former Chief Coordinator, Club Fair",
+                        "Former Advisor, Film, Television and Animation Club, Affiliated Senior High School of NCNU"
+                    ]
+                }
+            },
+            wang: {
+                img: "1oVe4oME56QcvE6q8V0DJFaibzme58oOX",
+                zh: {
+                    name: "王毓翰", title: "課程教學助理",
+                    edu: "管理學院學士班",
+                    curr: [
+                        "國際企業學系駱世民、梅筱珍教授之課程教學助理 (全英授課，產品經理與策略管理相關課程)",
+                        "南平山道田有機生態農場－實習中",
+                        "準備前往法國留學～"
+                    ],
+                    exp: [
+                        "管理學院學士班前系學會長"
+                    ]
+                },
+                en: {
+                    name: "Jeremy Wang", title: "Teaching Assistant",
+                    edu: "Bachelor Program of College of Management",
+                    curr: [
+                        "Teaching Assistant for Prof. Shih-Min Lo and Katie Mei (English-taught PM & Strategy courses)",
+                        "Farmer at Nanping Mountain Organic Farm－Internship",
+                        "Be going to study in France~"
+                    ],
+                    exp: [
+                        "Former President of College of Management Student Association"
+                    ]
+                }
+            }
+        };
+
+        const translations = {
+            zh: {
+                navTitle: "SMMC 1142",
+                navSubtitle: "國策管 TP專案",
+                navIntro: "簡介",
+                navTeam: "團隊",
+                navProjects: "專案",
+                cardIntro: "課程簡介",
+                cardTeam: "課程團隊",
+                cardProjects: "專案清單",
+                audioPlay: "語音導覽",
+                audioStop: "停止導覽",
+                mobileLang: "切換至 English",
+                mobileTheme: "切換深/淺色模式",
+                courseTitle: "國際策略管理",
+                courseSubtitle: "Strategic Management of Multinational Corporations (SMMC)",
+                courseDesc: "「兼具跨領域與多元場域、以問題解決與行動為導向、線上與實體串聯實踐，以『雙域、雙向、雙網合一』模式，徹底翻轉教室的互動學習。」",
+                courseObj: "本課程為商管領域之最終標竿課程 (Capstone Course)。目標在於建立學生對於國際企業經營上所應具備之策略思維、邏輯與分析手法。我們強調從「決策者角度」出發，培養產業競爭動態分析與企業資源能耐評估的實戰能力。",
+                teamTitle: "課程團隊",
+                prof1: "梅筱珍 教授",
+                prof2: "駱世民 教授",
+                roleProf: "授課教師",
+                ta1: "戴子然 助教",
+                ta2: "王毓翰 助教",
+                roleTA: "教學助理",
+                projectsTitle: "小組 TP 專案清單",
+                viewProject: "進入專案",
+                footerText: "互動式學習網頁競賽",
+                groupPrefix: "第",
+                groupSuffix: "組",
+                officialWebsite: "官方網站",
+                yahooFinance: "Yahoo 股價",
+                peerGrading: "修課同學互評表",
+                logicTitle: "TP 公司選擇邏輯",
+                logicP1: "從台灣製造業出發，理解企業如何在全球競爭中創造策略價值。本課程的 TP 公司選擇以製造業為核心，聚焦於半導體、人工智慧、電動車、自動化、電子代工、生技與精密機械等關鍵產業。各組選擇的企業不只是個案分析對象，更是觀察台灣企業如何面對全球競爭、技術轉型、永續發展與產業升級的重要窗口。",
+                logicP2: "透過互動式網頁專題，各組將企業資料、產業分析、策略思維與 AI 工具應用整合呈現，讓學習成果不只停留在課堂報告，而能轉化為可被瀏覽、分享與討論的策略學習作品。",
+                
+                linkTextbookTitle: "教材與參考書",
+                linkTextbookSub: "查看本課程使用的核心教材、參考書目與策略管理學習資源。",
+                linkTextbookBtn: "查看教材 →",
+                linkHubTitle: "課程專區",
+                linkHubSub: "進入密碼保護的課程資源區，查看專案連結、學習資料與相關內容。",
+                linkHubBtn: "進入專區 →",
+                hubNote: "修課同學請至Moodle查看密碼；若為訪客請寄信至原著作者 駱世民教授。",
+
+                pillar1Title: "決策思維 (Strategic Thinking)",
+                pillar1Desc: "從高階決策者角度，理解企業如何在複雜的全球競爭與動態合作網絡中，創造並獲取獨特價值。",
+                pillar2Title: "實證分析 (Evidence-Based Analysis)",
+                pillar2Desc: "結合產業報告、財務數據庫、公開資訊與嚴謹的策略架構，進行深度的企業資源與產業結構分析。",
+                pillar3Title: "AI 互動專案 (AI-Enhanced Project)",
+                pillar3Desc: "運用 AI 工具輔助情報蒐集與內容生成，最終將學習成果轉化為可互動、可分享的期末網頁專題。",
+
+                journeyTitle: "Learning Journey｜策略學習路徑",
+                journeyDesc: "本課程從策略概念出發，逐步引導學生進行產業分析、內部資源評估與成長策略規劃，建立理解企業如何創造並維持競爭優勢的完整分析框架。",
+                journeyStage1EN: "Strategy Foundation",
+                journeyStage1ZH: "策略基礎",
+                journeyQ1: "「這家公司如何創造價值？它的商業模式與策略邏輯是什麼？」",
+                journeyTP1: "<strong class=\"text-blue-700 dark:text-tech-accent block mb-1\">TP0 認識公司</strong>包含公司基本資料、營運範疇、產品服務、願景使命、近五年經營績效與重大新聞。",
+                journeyStage2EN: "External Analysis",
+                journeyStage2ZH: "外部環境與產業分析",
+                journeyQ2: "「這個產業是否具有吸引力？競爭者、合作夥伴與產業價值鏈如何影響企業獲利？」",
+                journeyTP2: "<strong class=\"text-cyan-600 dark:text-cyan-400 block mb-1\">TP1 外部與產業分析</strong>包含產業疆界、供需情況、產業鏈、產品生命週期、外部環境、產業結構與競爭分析。",
+                journeyStage3EN: "Internal Advantage",
+                journeyStage3ZH: "內部資源與競爭優勢",
+                journeyQ3: "「企業擁有哪些資源與能力？它如何形成競爭優勢並選擇適合的競爭定位？」",
+                journeyTP3: "<strong class=\"text-indigo-600 dark:text-indigo-400 block mb-1\">TP2 內部資源評估</strong>包含商業模式、策略活動系統、價值鏈、組織架構、有形無形資源與核心能耐。",
+                journeyStage4EN: "Growth & Renewal",
+                journeyStage4ZH: "成長、創新與策略轉型",
+                journeyQ4: "「企業如何透過創新、整合、多角化、國際化、聯盟或併購來維持成長與永續發展？」",
+                journeyTP4: "<strong class=\"text-purple-600 dark:text-purple-400 block mb-1\">TP3 未來成長與永續發展</strong>分析企業近期的策略革新、創新轉型、垂直整合、多角化與國際化布局。",
+
+                filterAll: "All / 所有組別",
+                filterA: "半導體：製造與記憶體",
+                filterB: "半導體：設計與封測",
+                filterC: "電腦與周邊系統",
+                filterD: "其他產業",
+                profileTitle: "Profile / 團隊簡歷",
+                modalCurr: "現職 / Current",
+                modalExp: "經歷 / Experience",
+
+                descG1: "全球資通訊產品設計與代工（ODM）大廠。",
+                descG2: "利基型記憶體大廠，產品涵蓋利基型DRAM、NOR Flash與SLC NAND。",
+                descG3: "全球晶圓代工龍頭。",
+                descG4: "全球半導體封裝與測試服務（OSAT）龍頭。",
+                descG5: "全球最大電子代工製造服務（EMS）龍頭。",
+                descG6: "專注於消費型與利基型DRAM的記憶體大廠。",
+                descG7: "全球電源管理與散熱管理解決方案大廠。",
+                descG8: "以糖尿病足部傷口潰瘍新藥「速必一／FESPIXON」為代表產品的創新藥研發廠商。",
+                descG9: "全球傳動控制與精密機械零組件領導品牌，核心產品包括線性滑軌與滾珠螺桿。",
+                descG10: "成熟與特殊製程晶圓代工大廠。",
+                descG11: "全球主要IC設計公司與智慧手機晶片大廠。",
+
+                audioHome: "歡迎來到國際策略管理 TP專案展示網頁。本課程為商管領域之最終標竿課程，我們強調從決策者角度出發，培養實戰能力。您可以點擊上方導覽列探索課程簡介、團隊成員與專案清單。",
+                audioIntro: "課程簡介。本課程結合跨領域與多元場域，以問題解決與行動為導向。課程涵蓋三大特色：決策思維、實證分析與AI互動專案。並透過四個階段的策略學習路徑，帶領學生從策略基礎走到未來成長與永續發展。",
+                audioTeam: "課程團隊。本課程由梅筱珍教授與駱世民教授共同授課，並由戴子然與王毓翰擔任教學助理。您可以點擊團隊成員卡片，查看詳細的簡歷與經歷。",
+            },
+            en: {
+                navTitle: "SMMC 1142",
+                navSubtitle: "TP Showcase",
+                navIntro: "Intro",
+                navTeam: "Team",
+                navProjects: "Projects",
+                cardIntro: "Course Introduction",
+                cardTeam: "Course Team",
+                cardProjects: "Term Projects",
+                audioPlay: "Audio Guide",
+                audioStop: "Stop Audio",
+                mobileLang: "Switch to 繁體中文",
+                mobileTheme: "Toggle Theme",
+                courseTitle: "Strategic Management",
+                courseSubtitle: "Strategic Management of Multinational Corporations (SMMC)",
+                courseDesc: "\"Integrating interdisciplinary learning and diverse learning environments, the program is problem-solving and action-oriented, connecting online and offline practices. Through the model of “Dual Domains, Dual Directions, and Dual-Network Integration,” it fundamentally transforms interactive learning in the classroom.\"",
+                courseObj: "As a capstone course in business management, the goal is to build strategic thinking, logical reasoning, and analytical skills. We emphasize evaluating business capabilities and industry dynamics from a decision-maker's perspective.",
+                teamTitle: "Course Team",
+                prof1: "Prof. Katie Mei",
+                prof2: "Prof. Shihmin Lo",
+                roleProf: "Instructor",
+                ta1: "TA Jan Tai",
+                ta2: "TA Jeremy Wang",
+                roleTA: "Teaching Assistant",
+                projectsTitle: "TP Project Teams",
+                viewProject: "View Project",
+                footerText: "Interactive Web Competition",
+                groupPrefix: "Group ",
+                groupSuffix: "",
+                officialWebsite: "Official Website",
+                yahooFinance: "Yahoo Finance",
+                peerGrading: "Peer Grading Form",
+                logicTitle: "TP Company Selection Logic",
+                logicP1: "Understanding Strategic Value Creation through Taiwan’s Manufacturing Industries. The TP company selection in this course is centered on manufacturing, with a focus on key industries such as semiconductors, artificial intelligence, electric vehicles, automation, electronics manufacturing services, biotechnology, and precision machinery. The companies selected by each team are not merely case-analysis subjects; they serve as important windows for examining how Taiwanese firms respond to global competition, technological transformation, sustainability challenges, and industrial upgrading.",
+                logicP2: "Through interactive web-based projects, each team integrates company information, industry analysis, strategic thinking, and AI-assisted tools to present its learning outcomes. As a result, the final projects go beyond classroom presentations and become strategy-learning works that can be browsed, shared, and discussed.",
+                
+                linkTextbookTitle: "Course Textbook",
+                linkTextbookSub: "Access the core materials and references for strategic management learning.",
+                linkTextbookBtn: "View Textbook →",
+                linkHubTitle: "Executive Hub",
+                linkHubSub: "Password-protected hub for course materials, project links, and learning resources.",
+                linkHubBtn: "Enter Hub →",
+                hubNote: "Enrolled students should check Moodle for the website password. Visitors may contact Professor Shih-Min Lo by email.",
+
+                pillar1Title: "Strategic Thinking",
+                pillar1Desc: "Understand how businesses create and capture unique value within complex global competition and dynamic cooperation networks from a top executive's perspective.",
+                pillar2Title: "Evidence-Based Analysis",
+                pillar2Desc: "Conduct in-depth analysis of corporate resources and industry structures combining industry reports, financial databases, public info, and rigorous frameworks.",
+                pillar3Title: "AI-Enhanced Project",
+                pillar3Desc: "Utilize AI tools to assist in intelligence gathering and content generation, ultimately transforming learning outcomes into interactive web projects.",
+
+                journeyTitle: "Learning Journey",
+                journeyDesc: "From strategic concepts to industry analysis, from internal resources to growth strategies, this course guides students to build a complete framework for understanding how firms create and sustain competitive advantage.",
+                journeyStage1EN: "Strategy Foundation",
+                journeyStage1ZH: "Strategy Foundation", 
+                journeyQ1: "\"How does this company create value? What are its business model and strategic logic?\"",
+                journeyTP1: "<strong class=\"text-blue-700 dark:text-tech-accent block mb-1\">TP0: Company Overview</strong>Including basic info, business scope, products/services, vision/mission, 5-year performance, and major news.",
+                journeyStage2EN: "External Analysis",
+                journeyStage2ZH: "External Analysis",
+                journeyQ2: "\"Is this industry attractive? How do competitors, partners, and the industry value chain affect corporate profitability?\"",
+                journeyTP2: "<strong class=\"text-cyan-600 dark:text-cyan-400 block mb-1\">TP1: External & Industry Analysis</strong>Including industry boundaries, supply/demand, value chain, product life cycle, external environment, industry structure, and competitor analysis.",
+                journeyStage3EN: "Internal Advantage",
+                journeyStage3ZH: "Internal Advantage",
+                journeyQ3: "\"What resources and capabilities does the firm possess? How does it build competitive advantage and choose appropriate competitive positioning?\"",
+                journeyTP3: "<strong class=\"text-indigo-600 dark:text-indigo-400 block mb-1\">TP2: Internal Resource Appraisal</strong>Including business model, strategic activity system, value chain, organizational chart, tangible/intangible resources, and core competencies.",
+                journeyStage4EN: "Growth & Renewal",
+                journeyStage4ZH: "Growth & Renewal",
+                journeyQ4: "\"How does the firm sustain growth and sustainable development through innovation, integration, diversification, internationalization, alliances, or M&A?\"",
+                journeyTP4: "<strong class=\"text-purple-600 dark:text-purple-400 block mb-1\">TP3: Future Growth & Sustainability</strong>Analyzing the firm's recent strategic renewal, innovation & transformation, vertical integration, diversification, and international footprint.",
+
+                filterAll: "All Teams",
+                filterA: "Semi: Mfg & Memory",
+                filterB: "Semi: Design & OSAT",
+                filterC: "PC & Peripherals",
+                filterD: "Others",
+                profileTitle: "Profile",
+                modalCurr: "Current",
+                modalExp: "Experience",
+
+                descG1: "A global leader in ICT product design and ODM manufacturing services.",
+                descG2: "A leading specialty memory manufacturer, with products covering specialty DRAM, NOR Flash, and SLC NAND.",
+                descG3: "The global leader in semiconductor foundry services.",
+                descG4: "The global leader in semiconductor assembly and testing services, also known as OSAT.",
+                descG5: "The world’s largest electronics manufacturing services, or EMS, provider.",
+                descG6: "A major memory manufacturer specializing in consumer and specialty DRAM products.",
+                descG7: "A global leader in power management and thermal management solutions.",
+                descG8: "An innovative drug development company known for its diabetic foot ulcer drug, FESPIXON.",
+                descG9: "A global leading brand in motion control and precision machinery components, with core products including linear guideways and ball screws.",
+                descG10: "A major semiconductor foundry specializing in mature and specialty process technologies.",
+                descG11: "A leading global IC design company and major smartphone chipset provider.",
+
+                audioHome: "Welcome to the Strategic Management of Multinational Corporations TP Showcase. As a capstone course, we emphasize evaluating business capabilities from a decision-maker's perspective. You can explore the course intro, team, and projects using the top navigation bar.",
+                audioIntro: "Course Introduction. This program integrates interdisciplinary learning and is problem-solving oriented. It features three main pillars: Strategic Thinking, Evidence-Based Analysis, and AI-Enhanced Projects. The learning journey guides students from strategy foundations to growth and renewal.",
+                audioTeam: "Course Team. The course is instructed by Professor Katie Mei and Professor Shihmin Lo, assisted by TAs Jan Tai and Jeremy Wang. You can click on the team cards to view their detailed profiles."
+            }
+        };
+
+        let currentLang = 'zh';
+        let isDarkMode = false;
+        let activeFilter = 'ALL';
+        let currentPage = 'home';
+        let currentModalPerson = null; // 新增：追蹤目前彈窗顯示的是誰
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                isDarkMode = true;
+                document.documentElement.classList.add('dark');
+            }
+            updateThemeIcon();
+            renderProjects();
+        });
+
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            if (isDarkMode) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+            updateThemeIcon();
+        }
+
+        function updateThemeIcon() {
+            const icon = document.getElementById('theme-icon');
+            if(!icon) return;
+            if (isDarkMode) {
+                icon.classList.replace('ph-moon', 'ph-sun');
+            } else {
+                icon.classList.replace('ph-sun', 'ph-moon');
+            }
+        }
+
+        function navigateTo(pageId) {
+            currentPage = pageId; 
+            
+            if (typeof isSpeaking !== 'undefined' && isSpeaking) {
+                stopAudioGuide(); 
+            }
+
+            document.querySelectorAll('.page-section').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('block');
+            });
+            const target = document.getElementById('page-' + pageId);
+            if(target) {
+                target.classList.remove('hidden');
+                target.classList.add('block');
+            }
+            window.scrollTo(0, 0);
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang][key]) {
+                    el.innerHTML = translations[currentLang][key];
+                }
+            });
+
+            renderProjects();
+
+            if (isSpeaking) stopAudioGuide();
+
+            // 新增：如果彈窗是開啟的，用新語言重新渲染
+            if (currentModalPerson) {
+                openModal(currentModalPerson);
+            }
+        }
+
+        function filterProjects(category, btnElement) {
+            activeFilter = category;
+            
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white', 'dark:bg-tech-accent', 'dark:text-tech-900');
+                btn.classList.add('bg-white', 'text-gray-600', 'dark:bg-tech-800', 'dark:text-gray-300');
+            });
+            
+            btnElement.classList.remove('bg-white', 'text-gray-600', 'dark:bg-tech-800', 'dark:text-gray-300');
+            btnElement.classList.add('bg-blue-600', 'text-white', 'dark:bg-tech-accent', 'dark:text-tech-900');
+
+            renderProjects();
+        }
+
+        function renderProjects() {
+            const container = document.getElementById('projects-container');
+            if(!container) return;
+            container.innerHTML = '';
+
+            const filteredProjects = activeFilter === 'ALL' ? projects : projects.filter(p => p.category === activeFilter);
+
+            filteredProjects.forEach(proj => {
+                const title = currentLang === 'zh' ? proj.zh : proj.en;
+                const viewBtn = translations[currentLang].viewProject;
+                const groupTxt = currentLang === 'zh' ? `第 ${proj.id.replace('G','')} 組` : `Group ${proj.id.replace('G','')}`;
+                const txtOfficial = translations[currentLang].officialWebsite;
+                const txtFinance = translations[currentLang].yahooFinance;
+                const descKey = `desc${proj.id}`;
+                const companyDesc = translations[currentLang][descKey] || "";
+
+                const iconHtml = proj.icon ? `<i class="ph ${proj.icon}"></i>` : `<span class="text-sm font-black tracking-tighter">TSMC</span>`;
+
+                let logoUrl = proj.logo;
+                if (logoUrl && logoUrl.includes('drive.google.com')) {
+                    const match = logoUrl.match(/d\/([a-zA-Z0-9_-]+)/) || logoUrl.match(/id=([a-zA-Z0-9_-]+)/);
+                    if (match && match[1]) {
+                        logoUrl = `https://drive.google.com/thumbnail?id=${match[1]}&sz=w600`;
+                    }
+                }
+
+                const logoBgHtml = logoUrl ? `
+                    <div class="absolute top-8 right-4 w-32 h-32 sm:w-40 sm:h-40 opacity-20 dark:opacity-40 pointer-events-none select-none z-0 transition-all duration-700 ease-out group-hover:opacity-35 dark:group-hover:opacity-70 group-hover:scale-110 origin-center flex items-center justify-center">
+                        <div class="absolute inset-0 w-[80%] h-[80%] m-auto rounded-full bg-white/0 dark:bg-white/40 blur-[30px] group-hover:dark:bg-white/60 transition-colors duration-700 z-0"></div>
+                        <img src="${logoUrl}" alt="${title} Watermark" class="relative z-10 w-full h-full object-contain object-center filter grayscale group-hover:grayscale-0 transition-all duration-700 drop-shadow-md dark:drop-shadow-[0_0_12px_rgba(255,255,255,0.8)]" onerror="this.style.display='none'">
+                    </div>
+                ` : '';
+
+                const websiteBtn = proj.website ? `
+                    <a href="${proj.website}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-tech-800 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-tech-700 hover:text-blue-700 dark:hover:text-tech-accent transition-colors border border-transparent dark:border-gray-700 shadow-sm relative z-10" onclick="event.stopPropagation()">
+                        <i class="ph ph-globe"></i> ${txtOfficial}
+                    </a>
+                ` : '';
+
+                const financeBtn = proj.finance ? `
+                    <a href="${proj.finance}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-tech-800 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-tech-700 hover:text-purple-700 dark:hover:text-purple-400 transition-colors border border-transparent dark:border-gray-700 shadow-sm relative z-10" onclick="event.stopPropagation()">
+                        <i class="ph ph-chart-line-up"></i> ${txtFinance}
+                    </a>
+                ` : '';
+
+                const card = `
+                    <div class="glass rounded-xl p-6 tech-card flex flex-col justify-between h-full group relative overflow-hidden">
+                        <div class="absolute -right-6 -top-6 w-24 h-24 bg-blue-500/10 dark:bg-tech-accent/10 rounded-full blur-xl group-hover:bg-blue-500/20 dark:group-hover:bg-tech-accent/20 transition-all duration-500 z-0"></div>
+                        ${logoBgHtml}
+                        <div class="relative z-10">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="w-12 h-12 rounded-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur flex items-center justify-center text-2xl text-blue-600 dark:text-tech-accent group-hover:scale-110 transition-transform shadow-sm border border-gray-100 dark:border-gray-700">
+                                    ${iconHtml}
+                                </div>
+                                <span class="text-xs font-bold px-2 py-1 bg-gray-200/80 dark:bg-gray-700/80 backdrop-blur text-gray-700 dark:text-gray-300 rounded uppercase tracking-wider">
+                                    ${proj.id}
+                                </span>
+                            </div>
+                            <h4 class="text-xl font-bold mb-1 dark:text-white">${title}</h4>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 font-medium mb-3">${groupTxt}</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 relative z-10 w-2/3 lg:w-3/4">${companyDesc}</p>
+                        </div>
+                        <div class="relative z-10 mt-6 flex flex-col justify-end grow">
+                            <div class="flex flex-wrap gap-2 mt-auto">
+                                ${websiteBtn}
+                                ${financeBtn}
+                            </div>
+                        </div>
+                        <div class="relative z-10 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                            <a href="${proj.projectUrl}" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 rounded-lg bg-gray-900 dark:bg-tech-700 text-white font-medium text-sm hover:bg-blue-600 dark:hover:bg-tech-accent hover:text-white dark:hover:text-tech-900 transition-colors flex items-center justify-center gap-2">
+                                <span>${viewBtn}</span>
+                                <i class="ph ph-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += card;
+            });
+        }
+
+        // --- Modal System ---
+        function openModal(personId) {
+            currentModalPerson = personId; // 紀錄當前開啟的人物
+            
+            const data = resumes[personId][currentLang];
+            const imgSrc = `https://drive.google.com/thumbnail?id=${resumes[personId].img}&sz=w400`;
+            const txtCurr = translations[currentLang].modalCurr;
+            const txtExp = translations[currentLang].modalExp;
+
+            const currList = data.curr.map(i => `<li class="mb-1">${i}</li>`).join('');
+            const expList = data.exp.map(i => `<li class="mb-1">${i}</li>`).join('');
+
+            const content = `
+                <div class="flex flex-col md:flex-row gap-6 items-start">
+                    <div class="w-32 h-32 md:w-48 md:h-48 flex-shrink-0">
+                        <img src="${imgSrc}" alt="${data.name}" class="w-full h-full object-cover rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
+                    </div>
+                    <div class="flex-grow">
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-1">${data.name}</h2>
+                        <p class="text-blue-600 dark:text-tech-accent font-medium mb-1">${data.title}</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 flex items-center gap-1"><i class="ph ph-graduation-cap"></i> ${data.edu}</p>
+                        
+                        <div class="mb-6">
+                            <h4 class="text-sm font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2 border-b border-gray-200 dark:border-gray-700 pb-1">${txtCurr}</h4>
+                            <ul class="list-disc list-inside text-sm text-gray-700 dark:text-gray-300 space-y-1 ml-1 leading-relaxed">
+                                ${currList}
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-sm font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2 border-b border-gray-200 dark:border-gray-700 pb-1">${txtExp}</h4>
+                            <ul class="list-disc list-inside text-sm text-gray-700 dark:text-gray-300 space-y-1 ml-1 leading-relaxed">
+                                ${expList}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('modal-body').innerHTML = content;
+            document.getElementById('modal-overlay').classList.remove('modal-closed');
+            document.getElementById('modal-overlay').classList.add('modal-open');
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.remove('modal-open');
+            document.getElementById('modal-overlay').classList.add('modal-closed');
+            currentModalPerson = null; // 清除紀錄
+        }
+
+        // Custom safe Toast
+        function showMessage(msg) {
+            let toast = document.getElementById('custom-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'custom-toast';
+                toast.className = 'fixed bottom-10 left-1/2 -translate-x-1/2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 px-6 py-3 rounded-full shadow-2xl z-[200] transition-all duration-300 opacity-0 transform translate-y-4 text-sm font-medium whitespace-nowrap pointer-events-none';
+                document.body.appendChild(toast);
+            }
+            toast.innerText = msg;
+            toast.classList.remove('opacity-0', 'translate-y-4');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'translate-y-4');
+            }, 3000);
+        }
+
+        // --- Standard Web Speech API ---
+        let isSpeaking = false;
+        const synth = window.speechSynthesis;
+
+        if (synth && synth.onvoiceschanged !== undefined) {
+            synth.onvoiceschanged = () => synth.getVoices();
+        }
+
+        function getBestVoice(lang) {
+            const voices = synth.getVoices();
+            if (lang === 'zh') {
+                let voice = voices.find(v => v.name.includes('Google 國語') || v.name.includes('Google Mandarin'));
+                if (!voice) voice = voices.find(v => v.name.includes('Natural') && v.lang.includes('zh-TW'));
+                if (!voice) voice = voices.find(v => v.name.includes('HsiaoYu Online'));
+                if (!voice) voice = voices.find(v => v.name.includes('Mei-Jia') || v.name.includes('Yating'));
+                if (!voice) voice = voices.find(v => v.lang === 'zh-TW');
+                if (!voice) voice = voices.find(v => v.lang.includes('zh'));
+                return voice;
+            } else {
+                let voice = voices.find(v => v.name.includes('Google UK English Male') || v.name.includes('Google US English'));
+                if (!voice) voice = voices.find(v => v.name.includes('Natural') && v.lang.includes('en'));
+                if (!voice) voice = voices.find(v => v.lang === 'en-GB' || v.lang === 'en-US');
+                return voice;
+            }
+        }
+
+        function playAudioGuide() {
+            if (!synth) {
+                showMessage(currentLang === 'zh' ? '您的瀏覽器不支援語音功能' : 'TTS not supported by your browser');
+                return;
+            }
+
+            synth.cancel();
+
+            const t = translations[currentLang];
+            let rawText = "";
+
+            switch (currentPage) {
+                case 'home':
+                    rawText = t.audioHome;
+                    break;
+                case 'intro':
+                    rawText = t.audioIntro;
+                    break;
+                case 'team':
+                    rawText = t.audioTeam;
+                    break;
+                case 'projects':
+                    if (currentLang === 'zh') {
+                        rawText = `小組 TP 專案清單。本課程從台灣製造業出發，聚焦於半導體、AI、電動車等關鍵產業。參與專案的企業包含：`;
+                        projects.forEach(p => { rawText += `第${p.id.replace('G','')}組，${p.zh}。`; });
+                    } else {
+                        rawText = `Term Projects. Our company selection is centered on Taiwan's key manufacturing industries. The participating enterprise projects are: `;
+                        projects.forEach(p => { rawText += `Group ${p.id.replace('G','')}, ${p.en}. `; });
+                    }
+                    break;
+                default:
+                    rawText = t.audioHome;
+            }
+
+            const scriptText = rawText.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ');
+
+            const utterance = new SpeechSynthesisUtterance(scriptText);
+            const bestVoice = getBestVoice(currentLang);
+            if (bestVoice) {
+                utterance.voice = bestVoice;
+            }
+            
+            utterance.lang = currentLang === 'zh' ? 'zh-TW' : 'en-US';
+            utterance.rate = currentLang === 'zh' ? 1.1 : 0.95; 
+            utterance.pitch = 1.0;
+
+            utterance.onstart = () => {
+                isSpeaking = true;
+                updateAudioButtonUI();
+            };
+            
+            utterance.onend = () => {
+                isSpeaking = false;
+                updateAudioButtonUI();
+            };
+
+            utterance.onerror = (e) => {
+                if (e.error !== 'canceled' && e.error !== 'interrupted') {
+                    console.error("Speech Synthesis Error:", e);
+                }
+                isSpeaking = false;
+                updateAudioButtonUI();
+            };
+
+            synth.speak(utterance);
+        }
+
+        function stopAudioGuide() {
+            if (synth) {
+                synth.cancel();
+            }
+            isSpeaking = false;
+            updateAudioButtonUI();
+        }
+
+        function toggleAudio() {
+            if (isSpeaking) {
+                stopAudioGuide();
+            } else {
+                playAudioGuide();
+            }
+        }
+
+        function updateAudioButtonUI() {
+            const btns = [document.getElementById('btn-audio'), document.getElementById('btn-audio-mobile')];
+            
+            btns.forEach(btn => {
+                if(!btn) return;
+                const icon = btn.querySelector('i');
+                const span = btn.querySelector('span'); 
+                
+                if (isSpeaking) {
+                    btn.classList.add('animate-pulse', 'bg-red-100', 'dark:bg-red-900/50', 'text-red-600', 'dark:text-red-400');
+                    btn.classList.remove('bg-blue-100', 'dark:bg-tech-800', 'text-blue-700', 'dark:text-tech-accent');
+                    if(icon) icon.classList.replace('ph-speaker-high', 'ph-stop');
+                    if(span) span.innerText = translations[currentLang].audioStop;
+                } else {
+                    btn.classList.remove('animate-pulse', 'bg-red-100', 'dark:bg-red-900/50', 'text-red-600', 'dark:text-red-400');
+                    btn.classList.add('bg-blue-100', 'dark:bg-tech-800', 'text-blue-700', 'dark:text-tech-accent');
+                    if(icon) icon.classList.replace('ph-stop', 'ph-speaker-high');
+                    if(span) span.innerText = translations[currentLang].audioPlay;
+                }
+            });
+        }
+    </script>
+</body>
+</html>
