@@ -66,6 +66,25 @@
             border-color: rgba(6, 182, 212, 0.5);
         }
 
+        /* 手機/平板點擊回饋：保留桌機 hover，補上觸控裝置的動態感 */
+        .tech-card:active,
+        .tech-card.touch-active {
+            transform: translateY(-4px) scale(0.99);
+            box-shadow: 0 12px 28px -12px rgba(15, 23, 42, 0.35);
+        }
+        .dark .tech-card:active,
+        .dark .tech-card.touch-active {
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.28);
+            border-color: rgba(6, 182, 212, 0.45);
+        }
+
+        /* 只在切換亮/暗色的瞬間關閉大範圍轉場，避免手機 Safari 卡住；不影響卡片 hover / touch 動態 */
+        body.theme-switching,
+        body.theme-switching * {
+            transition-duration: 0s !important;
+            animation-duration: 0s !important;
+        }
+
         .bg-grid { background-size: 40px 40px; }
 
         /* Modal Animation */
@@ -76,12 +95,17 @@
         .modal-closed#modal-overlay { opacity: 0; visibility: hidden; transition: visibility 0s linear 0.3s, opacity 0.3s ease; }
         .modal-closed #modal-content { transform: scale(0.95) translateY(20px); opacity: 0; }
 
-        /* 修正手機版切換亮/暗色時的卡頓：切換瞬間暫停大量 transition */
-        html.theme-switching *,
-        html.theme-switching *::before,
-        html.theme-switching *::after {
-            transition: none !important;
-            animation: none !important;
+        /* 手機版 modal 必須蓋過固定導覽列，並保留可按的關閉按鈕 */
+        #modal-overlay { z-index: 10000; overflow-y: auto; }
+        @media (max-width: 640px) {
+            #modal-overlay.modal-open {
+                align-items: flex-start;
+                padding-top: calc(env(safe-area-inset-top) + 0.75rem);
+                padding-bottom: calc(env(safe-area-inset-bottom) + 0.75rem);
+            }
+            #modal-content {
+                max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 1.5rem);
+            }
         }
 
         /* 修正暗色模式下公司 Logo 浮水印出現白色方塊 */
@@ -510,7 +534,7 @@
     </main>
 
     <!-- Modal System for Resumes -->
-    <div id="modal-overlay" class="fixed inset-0 bg-gray-900/60 dark:bg-black/80 backdrop-blur-sm z-[100] modal-closed flex items-center justify-center p-4 sm:p-6" onclick="closeModal()">
+    <div id="modal-overlay" class="fixed inset-0 bg-gray-900/60 dark:bg-black/80 backdrop-blur-sm z-[10000] modal-closed flex items-center justify-center p-4 sm:p-6" onclick="closeModal()">
         <div id="modal-content" class="bg-white dark:bg-tech-800 w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-tech-900">
                 <h3 class="font-bold text-lg dark:text-white flex items-center gap-2"><i class="ph-fill ph-identification-card text-blue-600 dark:text-tech-accent"></i> <span data-i18n="profileTitle">Profile / 團隊簡歷</span></h3>
@@ -586,7 +610,7 @@
                 img: "19Zb5wVObY10ddLMFz_ZLriAq0G5WNVJD",
                 email: "katiemhc@gmail.com",
                 zh: {
-                    name: "梅筱珍 博士", title: "國立暨南國際大學 兼任教授級專業技術人員",
+                    name: "梅筱珍 教授", title: "國立暨南國際大學 兼任教授級專業技術人員",
                     edu: "國立暨南國際大學 國際企業學系博士",
                     curr: [
                         "國立暨南國際大學國際企業學系兼任教授級專業技術人員 (114/08/01~)",
@@ -604,7 +628,7 @@
                     ]
                 },
                 en: {
-                    name: "Katie Mei, Ph.D.", title: "Professor-level Professional Specialist (Adjunct)",
+                    name: "Professor Katie Mei", title: "Professor-level Professional Specialist (Adjunct)",
                     edu: "Ph.D., Department of International Business Studies, NCNU",
                     curr: [
                         "Professor-level Professional Specialist (Adjunct), Dept. of IBS, NCNU (Aug 2025–Present)",
@@ -626,7 +650,7 @@
                 img: "1beZuOAgu3EMRXWj49wDyakp1V7Xa-UvT",
                 email: "smlo@ncnu.edu.tw",
                 zh: {
-                    name: "駱世民 博士", title: "國立暨南國際大學 專任教授",
+                    name: "駱世民 教授", title: "國立暨南國際大學 專任教授",
                     edu: "國立台灣大學 國際企業學系博士 / 機械工程學系碩、學士",
                     curr: [
                         "現任－國立暨南國際大學國際企業學系專任教授",
@@ -645,7 +669,7 @@
                     ]
                 },
                 en: {
-                    name: "Shihmin Lo, Ph.D.", title: "Professor, Department of International Business Studies",
+                    name: "Professor Shih-Min Lo", title: "Professor, Department of International Business Studies",
                     edu: "Ph.D. in Strategic Management, NTU / M.S. & B.S. in Mechanical Engineering, NTU",
                     curr: [
                         "Professor at the Department of International Business Studies, College of Management, NCNU.",
@@ -926,17 +950,26 @@
             // 預設以亮色模式作為起始頁，不跟隨系統深色設定
             isDarkMode = false;
             document.documentElement.classList.remove('dark');
+            document.documentElement.style.colorScheme = 'light';
             updateThemeIcon();
             renderProjects();
+            initTouchFeedback();
         });
 
         function toggleTheme() {
             const root = document.documentElement;
-            root.classList.add('theme-switching');
-            isDarkMode = !isDarkMode;
-            root.classList.toggle('dark', isDarkMode);
-            updateThemeIcon();
-            window.setTimeout(() => root.classList.remove('theme-switching'), 100);
+            document.body.classList.add('theme-switching');
+
+            requestAnimationFrame(() => {
+                isDarkMode = !isDarkMode;
+                root.classList.toggle('dark', isDarkMode);
+                root.style.colorScheme = isDarkMode ? 'dark' : 'light';
+                updateThemeIcon();
+
+                window.setTimeout(() => {
+                    document.body.classList.remove('theme-switching');
+                }, 120);
+            });
         }
 
         function updateThemeIcon() {
@@ -947,6 +980,26 @@
             } else {
                 icon.classList.replace('ph-sun', 'ph-moon');
             }
+        }
+
+        function initTouchFeedback() {
+            if (window.__smmcTouchFeedbackReady) return;
+            window.__smmcTouchFeedbackReady = true;
+
+            const clearTouchActive = () => {
+                document.querySelectorAll('.tech-card.touch-active').forEach(el => el.classList.remove('touch-active'));
+            };
+
+            document.addEventListener('pointerdown', (event) => {
+                if (event.pointerType === 'mouse') return;
+                const card = event.target.closest('.tech-card');
+                if (!card) return;
+                card.classList.add('touch-active');
+            }, { passive: true });
+
+            ['pointerup', 'pointercancel', 'pointerleave', 'scroll'].forEach(eventName => {
+                document.addEventListener(eventName, clearTouchActive, { passive: true });
+            });
         }
 
         function navigateTo(pageId) {
