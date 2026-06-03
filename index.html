@@ -54,7 +54,6 @@
         .tech-card { 
             transition: all 0.3s ease; 
             cursor: pointer; 
-            /* 修正手機版點擊時底下會有白底的問題 */
             -webkit-tap-highlight-color: transparent; 
         }
         .tech-card:hover {
@@ -66,7 +65,7 @@
             border-color: rgba(6, 182, 212, 0.5);
         }
 
-        /* 手機/平板點擊回饋：保留桌機 hover，補上觸控裝置的動態感 */
+        /* 手機/平板點擊回饋 */
         .tech-card:active,
         .tech-card.touch-active {
             transform: translateY(-4px) scale(0.99);
@@ -78,7 +77,13 @@
             border-color: rgba(6, 182, 212, 0.45);
         }
 
-        /* TP 專案卡片：手機/平板點擊時不要先閃白框，直接進入光暈狀態 */
+        /* TP 專案卡片 動態顏色變數支援 */
+        .project-card {
+            --cat-color-light: rgba(37, 99, 235, 0.55);
+            --cat-color-dark: rgba(6, 182, 212, 0.75);
+            --cat-shadow-light: rgba(37, 99, 235, 0.45);
+            --cat-shadow-dark: rgba(6, 182, 212, 0.60);
+        }
         .project-card,
         .project-card * {
             -webkit-tap-highlight-color: transparent !important;
@@ -96,34 +101,24 @@
             .project-card.touch-active {
                 transform: translateY(-4px) scale(0.995);
                 background: rgba(255, 255, 255, 0.76) !important;
-                border-color: rgba(37, 99, 235, 0.55) !important;
+                border-color: var(--cat-color-light) !important;
                 box-shadow:
-                    0 0 0 1px rgba(37, 99, 235, 0.16),
-                    0 0 22px rgba(37, 99, 235, 0.18),
-                    0 18px 40px -20px rgba(37, 99, 235, 0.45) !important;
+                    0 0 0 1px rgba(255,255,255,0.5),
+                    0 0 22px rgba(255,255,255,0.5),
+                    0 18px 40px -20px var(--cat-shadow-light) !important;
             }
             .dark .project-card:active,
             .dark .project-card.touch-active {
                 background: rgba(15, 23, 42, 0.78) !important;
-                border-color: rgba(6, 182, 212, 0.75) !important;
+                border-color: var(--cat-color-dark) !important;
                 box-shadow:
-                    0 0 0 1px rgba(6, 182, 212, 0.35),
-                    0 0 28px rgba(6, 182, 212, 0.34),
-                    0 20px 46px -24px rgba(6, 182, 212, 0.60) !important;
-            }
-            .dark .project-card:active::before,
-            .dark .project-card.touch-active::before {
-                content: "";
-                position: absolute;
-                inset: -1px;
-                border-radius: inherit;
-                pointer-events: none;
-                background: radial-gradient(circle at 35% 25%, rgba(6, 182, 212, 0.16), transparent 45%);
-                z-index: 0;
+                    0 0 0 1px rgba(255,255,255,0.1),
+                    0 0 28px rgba(255,255,255,0.1),
+                    0 20px 46px -24px var(--cat-shadow-dark) !important;
             }
         }
 
-        /* 只在切換亮/暗色的瞬間關閉大範圍轉場，避免手機 Safari 卡住；不影響卡片 hover / touch 動態 */
+        /* 主題切換時關閉轉場 */
         body.theme-switching,
         body.theme-switching * {
             transition-duration: 0s !important;
@@ -135,12 +130,12 @@
         /* Modal Animation */
         #modal-overlay { transition: opacity 0.3s ease; }
         #modal-content { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease; }
-        .modal-open#modal-overlay { opacity: 1; visibility: visible; }
+        .modal-open#modal-overlay { opacity: 1; visibility: visible; pointer-events: auto; }
         .modal-open #modal-content { transform: scale(1) translateY(0); opacity: 1; }
-        .modal-closed#modal-overlay { opacity: 0; visibility: hidden; transition: visibility 0s linear 0.3s, opacity 0.3s ease; }
+        .modal-closed#modal-overlay { opacity: 0; visibility: hidden; pointer-events: none; transition: visibility 0s linear 0.3s, opacity 0.3s ease; }
         .modal-closed #modal-content { transform: scale(0.95) translateY(20px); opacity: 0; }
 
-        /* Audio controls: keep visible above mobile browser toolbar */
+        /* Audio controls */
         @media (max-width: 640px) {
             #audio-controller {
                 bottom: calc(env(safe-area-inset-bottom, 0px) + 5.25rem);
@@ -151,8 +146,7 @@
             }
         }
 
-
-        /* 手機版 modal 必須蓋過固定導覽列，並保留可按的關閉按鈕 */
+        /* Modal Z-index for mobile */
         #modal-overlay { z-index: 10000; overflow-y: auto; }
         @media (max-width: 640px) {
             #modal-overlay.modal-open {
@@ -165,13 +159,32 @@
             }
         }
 
-        /* 修正暗色模式下公司 Logo 浮水印出現白色方塊 */
+        /* 修正 Logo 浮水印吃色問題 */
         .company-logo-watermark {
             mix-blend-mode: multiply;
         }
         .dark .company-logo-watermark {
             filter: grayscale(1) invert(1) contrast(1.1);
             mix-blend-mode: screen;
+        }
+
+        /* Highlight animation for scrolling from map */
+        @keyframes highlightCard {
+            0% { transform: scale(1); box-shadow: 0 0 0 rgba(0,0,0,0); }
+            50% { transform: scale(1.02); box-shadow: 0 0 30px var(--cat-shadow-light); }
+            100% { transform: scale(1); box-shadow: 0 10px 30px -10px var(--tw-shadow-color); }
+        }
+        .dark @keyframes highlightCard {
+            0% { transform: scale(1); box-shadow: 0 0 0 rgba(0,0,0,0); }
+            50% { transform: scale(1.02); box-shadow: 0 0 30px var(--cat-shadow-dark); }
+            100% { transform: scale(1); box-shadow: 0 0 20px rgba(6, 182, 212, 0.3); }
+        }
+        .highlight-pulse {
+            animation: highlightCard 1.5s ease-out;
+            border-color: var(--cat-color-light) !important;
+        }
+        .dark .highlight-pulse {
+            border-color: var(--cat-color-dark) !important;
         }
     </style>
 </head>
@@ -254,7 +267,7 @@
         
         <!-- Page: Home -->
         <div id="page-home" class="page-section block">
-            <section class="mb-20 mt-10 text-center animate-fade-in-up">
+            <section class="mb-20 mt-10 text-center animate-[fadeInUp_0.6s_ease-out]">
                 <div class="inline-block px-4 py-1.5 rounded-full bg-blue-100 dark:bg-tech-800/50 border border-blue-200 dark:border-tech-accent/30 text-blue-700 dark:text-tech-accent text-sm font-semibold mb-6 tracking-widest">
                     SPRING 2026
                 </div>
@@ -307,21 +320,21 @@
 
                 <!-- 課程三大特色 Pillars -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-                    <div class="glass p-6 rounded-2xl tech-card cursor-default group">
+                    <div class="glass p-6 rounded-2xl tech-card group">
                         <div class="w-12 h-12 bg-blue-100 dark:bg-tech-800 text-blue-600 dark:text-tech-accent rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
                             <i class="ph ph-strategy"></i>
                         </div>
                         <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-2" data-i18n="pillar1Title">決策思維 (Strategic Thinking)</h4>
                         <p class="text-sm text-gray-600 dark:text-gray-400" data-i18n="pillar1Desc">從高階決策者角度，理解企業如何在複雜的全球競爭與動態合作網絡中，創造並獲取獨特價值。</p>
                     </div>
-                    <div class="glass p-6 rounded-2xl tech-card cursor-default group">
+                    <div class="glass p-6 rounded-2xl tech-card group">
                         <div class="w-12 h-12 bg-purple-100 dark:bg-tech-800 text-purple-600 dark:text-tech-accent rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
                             <i class="ph ph-chart-bar"></i>
                         </div>
                         <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-2" data-i18n="pillar2Title">實證分析 (Evidence-Based Analysis)</h4>
                         <p class="text-sm text-gray-600 dark:text-gray-400" data-i18n="pillar2Desc">結合產業報告、財務數據庫、公開資訊與嚴謹的策略架構，進行深度的企業資源與產業結構分析。</p>
                     </div>
-                    <div class="glass p-6 rounded-2xl tech-card cursor-default group">
+                    <div class="glass p-6 rounded-2xl tech-card group">
                         <div class="w-12 h-12 bg-cyan-100 dark:bg-tech-800 text-cyan-600 dark:text-tech-accent rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
                             <i class="ph ph-magic-wand"></i>
                         </div>
@@ -404,7 +417,6 @@
                         <div class="glass p-6 rounded-2xl flex flex-col h-full relative group tech-card">
                             <div class="block lg:hidden absolute left-[-0.7rem] top-6 w-4 h-4 rounded-full bg-indigo-500 border-2 border-white dark:border-tech-900 shadow-md"></div>
                             <div class="w-14 h-14 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-center text-3xl text-indigo-500 dark:text-indigo-400 mb-5 mx-auto lg:mx-0 group-hover:scale-110 transition-transform">
-                                <!-- 使用 inline SVG，避免第三方 icon class 載入失敗 -->
                                 <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                     <path d="M12 3L21 8L12 13L3 8L12 3Z" fill="currentColor" opacity="0.95"/>
                                     <path d="M5.2 11.1L12 14.9L18.8 11.1L21 12.3L12 17.3L3 12.3L5.2 11.1Z" fill="currentColor" opacity="0.72"/>
@@ -459,7 +471,7 @@
                 </div>
             </section>
 
-            <!-- 3. 課程資源入口區塊 (限定在 Intro 頁面) -->
+            <!-- 3. 課程資源入口區塊 (修復中英切換跑版) -->
             <section class="mb-10 max-w-5xl mx-auto">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
                     <!-- 教材卡片 -->
@@ -467,9 +479,9 @@
                         <div class="w-12 h-12 bg-gray-100 dark:bg-gray-800 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center text-2xl mb-6 shadow-sm border border-gray-200 dark:border-gray-700 group-hover:scale-110 transition-transform duration-300">
                             <i class="ph-fill ph-book-open"></i>
                         </div>
-                        <h4 class="text-xl font-bold text-gray-900 dark:text-white mb-3" data-i18n="linkTextbookTitle">教材與參考書</h4>
+                        <h4 class="text-xl font-bold text-gray-900 dark:text-white mb-3" data-i18n="linkTextbookTitle">課程教材</h4>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-8 flex-grow" data-i18n="linkTextbookSub">查看本課程使用的核心教材、參考書目與策略管理學習資源。</p>
-                        <a href="https://lolopodcast.github.io/SMMC-EMI-Textbook-Web/" target="_blank" rel="noopener noreferrer" class="w-full text-center py-2.5 rounded-lg bg-blue-50/50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium text-sm hover:bg-blue-100 dark:hover:bg-blue-900/40 border border-blue-200 dark:border-blue-800 transition-colors">
+                        <a href="https://lolopodcast.github.io/SMMC-EMI-Textbook-Web/" target="_blank" rel="noopener noreferrer" class="w-full text-center py-2.5 rounded-lg bg-transparent text-blue-600 dark:text-blue-400 font-medium text-sm hover:bg-blue-50 dark:hover:bg-blue-900/30 border border-blue-200 dark:border-blue-800 transition-colors">
                             <span data-i18n="linkTextbookBtn">查看教材 →</span>
                         </a>
                     </div>
@@ -481,7 +493,7 @@
                         </div>
                         <h4 class="text-xl font-bold text-gray-900 dark:text-white mb-3" data-i18n="linkHubTitle">課程專區</h4>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-8 flex-grow" data-i18n="linkHubSub">進入密碼保護的課程資源區，查看專案連結、學習資料與相關內容。</p>
-                        <a href="https://lolopodcast.github.io/SMMC-Executive-Hub/" target="_blank" rel="noopener noreferrer" class="w-full text-center py-2.5 rounded-lg bg-purple-50/50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 font-medium text-sm hover:bg-purple-100 dark:hover:bg-purple-900/40 border border-purple-200 dark:border-purple-800 transition-colors">
+                        <a href="https://lolopodcast.github.io/SMMC-Executive-Hub/" target="_blank" rel="noopener noreferrer" class="w-full text-center py-2.5 rounded-lg bg-transparent text-purple-600 dark:text-purple-400 font-medium text-sm hover:bg-purple-50 dark:hover:bg-purple-900/30 border border-purple-200 dark:border-purple-800 transition-colors">
                             <span data-i18n="linkHubBtn">進入專區 →</span>
                         </a>
                     </div>
@@ -562,13 +574,13 @@
                     </div>
                 </div>
 
-                <!-- 產業篩選器 -->
+                <!-- 產業篩選器 (顏色連動) -->
                 <div class="flex flex-wrap gap-2 mb-8">
-                    <button class="filter-btn px-4 py-1.5 rounded-full text-sm font-medium transition-colors bg-blue-600 text-white dark:bg-tech-accent dark:text-tech-900 shadow-sm" onclick="filterProjects('ALL', this)" data-i18n="filterAll">All / 所有組別</button>
-                    <button class="filter-btn px-4 py-1.5 rounded-full text-sm font-medium transition-colors bg-white dark:bg-tech-800 text-gray-600 dark:text-gray-300 hover:bg-blue-50 border border-gray-200 dark:border-gray-700 shadow-sm" onclick="filterProjects('A', this)" data-i18n="filterA">半導體：製造與記憶體</button>
-                    <button class="filter-btn px-4 py-1.5 rounded-full text-sm font-medium transition-colors bg-white dark:bg-tech-800 text-gray-600 dark:text-gray-300 hover:bg-blue-50 border border-gray-200 dark:border-gray-700 shadow-sm" onclick="filterProjects('B', this)" data-i18n="filterB">半導體：設計與封測</button>
-                    <button class="filter-btn px-4 py-1.5 rounded-full text-sm font-medium transition-colors bg-white dark:bg-tech-800 text-gray-600 dark:text-gray-300 hover:bg-blue-50 border border-gray-200 dark:border-gray-700 shadow-sm" onclick="filterProjects('C', this)" data-i18n="filterC">電腦與周邊系統</button>
-                    <button class="filter-btn px-4 py-1.5 rounded-full text-sm font-medium transition-colors bg-white dark:bg-tech-800 text-gray-600 dark:text-gray-300 hover:bg-blue-50 border border-gray-200 dark:border-gray-700 shadow-sm" onclick="filterProjects('D', this)" data-i18n="filterD">其他產業</button>
+                    <button class="filter-btn px-4 py-1.5 rounded-full text-sm font-medium transition-colors border border-transparent bg-blue-600 text-white dark:bg-blue-500 dark:text-white shadow-sm" onclick="filterProjects('ALL', this)" data-i18n="filterAll">All / 所有組別</button>
+                    <button class="filter-btn px-4 py-1.5 rounded-full text-sm font-medium transition-colors border border-gray-200 dark:border-gray-700 bg-white text-gray-600 dark:bg-tech-800 dark:text-gray-300 hover:bg-teal-50 hover:text-teal-700 dark:hover:bg-teal-900/30 dark:hover:text-teal-400 shadow-sm" onclick="filterProjects('A', this)" data-cat="A" data-i18n="filterA">半導體：製造與記憶體</button>
+                    <button class="filter-btn px-4 py-1.5 rounded-full text-sm font-medium transition-colors border border-gray-200 dark:border-gray-700 bg-white text-gray-600 dark:bg-tech-800 dark:text-gray-300 hover:bg-rose-50 hover:text-rose-700 dark:hover:bg-rose-900/30 dark:hover:text-rose-400 shadow-sm" onclick="filterProjects('B', this)" data-cat="B" data-i18n="filterB">半導體：設計與封測</button>
+                    <button class="filter-btn px-4 py-1.5 rounded-full text-sm font-medium transition-colors border border-gray-200 dark:border-gray-700 bg-white text-gray-600 dark:bg-tech-800 dark:text-gray-300 hover:bg-orange-50 hover:text-orange-700 dark:hover:bg-orange-900/30 dark:hover:text-orange-400 shadow-sm" onclick="filterProjects('C', this)" data-cat="C" data-i18n="filterC">電腦與周邊系統</button>
+                    <button class="filter-btn px-4 py-1.5 rounded-full text-sm font-medium transition-colors border border-gray-200 dark:border-gray-700 bg-white text-gray-600 dark:bg-tech-800 dark:text-gray-300 hover:bg-fuchsia-50 hover:text-fuchsia-700 dark:hover:bg-fuchsia-900/30 dark:hover:text-fuchsia-400 shadow-sm" onclick="filterProjects('D', this)" data-cat="D" data-i18n="filterD">其他產業</button>
                 </div>
 
                 <!-- 選擇邏輯 -->
@@ -580,6 +592,127 @@
                     <div class="space-y-4 text-sm md:text-base text-gray-600 dark:text-gray-300 leading-relaxed">
                         <p data-i18n="logicP1">從台灣製造業出發，理解企業如何在全球競爭中創造策略價值。本課程的 TP 公司選擇以製造業為核心，聚焦於半導體、人工智慧、電動車、自動化、電子代工、生技與精密機械等關鍵產業。各組選擇的企業不只是個案分析對象，更是觀察台灣企業如何面對全球競爭、技術轉型、永續發展與產業升級的重要窗口。</p>
                         <p data-i18n="logicP2">透過互動式網頁專題，各組將企業資料、產業分析、策略思維與 AI 工具應用整合呈現，讓學習成果不只停留在課堂報告，而能轉化為可被瀏覽、分享與討論的策略學習作品。</p>
+                    </div>
+                </div>
+
+                <!-- 產業地圖 (Industry Landscape) -->
+                <div class="glass p-6 md:p-8 rounded-2xl mb-12 shadow-sm relative overflow-hidden bg-white/40 dark:bg-tech-800/40 border border-gray-200 dark:border-gray-700">
+                    
+                    <div class="flex items-center gap-3 mb-8">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white shadow-lg">
+                            <i class="ph-fill ph-map-trifold text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-bold text-gray-900 dark:text-white leading-tight" data-i18n="mapTitle">Industry Landscape</h4>
+                            <p class="text-xs font-medium text-gray-500 uppercase tracking-widest" data-i18n="mapSubtitle">產業地圖</p>
+                        </div>
+                    </div>
+
+                    <!-- 電腦版/平板版：十字坐標圖 (隱藏於手機版) -->
+                    <div class="hidden sm:block relative w-full aspect-[16/9] max-w-4xl mx-auto mt-8 mb-8">
+                        <!-- Y 軸 (知識密集/輕資產 - 資本密集/重資產) -->
+                        <div class="absolute left-1/2 top-16 bottom-16 w-1.5 -translate-x-1/2 bg-gradient-to-b from-yellow-300 via-yellow-200 to-yellow-300 dark:from-yellow-500/80 dark:via-yellow-300/50 dark:to-yellow-500/80 rounded-full shadow-[0_0_10px_rgba(253,224,71,0.5)]"></div>
+                        <!-- Y 軸箭頭與標籤 -->
+                        <div class="absolute left-1/2 top-0 -translate-x-1/2 flex flex-col items-center">
+                            <div class="px-3 py-1.5 bg-gray-100 dark:bg-tech-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-bold text-gray-700 dark:text-gray-300 shadow-sm whitespace-nowrap mb-1" data-i18n="axisYTop">知識密集/輕資產</div>
+                            <span class="text-yellow-500 dark:text-yellow-400 font-bold text-sm">高</span>
+                        </div>
+                        <div class="absolute left-1/2 bottom-0 -translate-x-1/2 flex flex-col items-center">
+                            <span class="text-yellow-500 dark:text-yellow-400 font-bold text-sm mb-1">低</span>
+                            <div class="px-3 py-1.5 bg-gray-100 dark:bg-tech-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-bold text-gray-700 dark:text-gray-300 shadow-sm whitespace-nowrap" data-i18n="axisYBottom">資本密集/重資產</div>
+                        </div>
+
+                        <!-- X 軸 (上游 - 下游) -->
+                        <div class="absolute top-1/2 left-[5rem] right-[12rem] h-1.5 -translate-y-1/2 bg-gradient-to-r from-green-400 via-green-300 to-green-400 dark:from-green-500/80 dark:via-green-300/50 dark:to-green-500/80 rounded-full shadow-[0_0_10px_rgba(74,222,128,0.5)]"></div>
+                        <!-- X 軸標籤 -->
+                        <div class="absolute top-1/2 left-0 -translate-y-1/2 flex items-center">
+                            <span class="text-green-600 dark:text-green-400 font-bold text-sm whitespace-nowrap" data-i18n="axisXLeft">上游</span>
+                        </div>
+                        <div class="absolute top-1/2 right-0 -translate-y-1/2 flex items-center gap-3">
+                            <span class="text-green-600 dark:text-green-400 font-bold text-sm whitespace-nowrap" data-i18n="axisXRight">下游</span>
+                            <div class="px-3 py-1.5 bg-gray-100 dark:bg-tech-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-bold text-gray-700 dark:text-gray-300 shadow-sm whitespace-nowrap" data-i18n="axisXTitle">價值鏈</div>
+                        </div>
+
+                        <!-- 中間標題 -->
+                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-200 dark:bg-tech-700 px-6 py-3 rounded-xl shadow-lg border border-gray-300 dark:border-gray-600 z-10 text-center">
+                            <h5 class="font-bold text-gray-800 dark:text-white text-sm" data-i18n="navTitle">SMMC 1142</h5>
+                            <p class="text-xs text-gray-600 dark:text-gray-300 font-medium mt-0.5">Term Projects (TP)</p>
+                        </div>
+
+                        <!-- 圖例 (Legend) - 右上角 -->
+                        <div class="absolute top-0 right-0 flex flex-col gap-2">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-teal-400 shadow-[0_0_8px_rgba(45,212,191,0.6)]"></span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400 font-medium" data-i18n="filterA">半導體：製造與記憶體</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-rose-400 shadow-[0_0_8px_rgba(251,113,133,0.6)]"></span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400 font-medium" data-i18n="filterB">半導體：設計與封測</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-orange-400 shadow-[0_0_8px_rgba(251,146,60,0.6)]"></span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400 font-medium" data-i18n="filterC">電腦與周邊系統</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-fuchsia-400 shadow-[0_0_8px_rgba(232,121,249,0.6)]"></span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400 font-medium" data-i18n="filterD">其他產業</span>
+                            </div>
+                        </div>
+
+                        <!-- 企業定位節點 (Interactive Nodes) -->
+                        <!-- A: 製造與記憶體 (Teal) -->
+                        <button onclick="scrollToProject('G3')" class="absolute top-[52%] left-[32%] px-4 py-1.5 bg-teal-300/90 dark:bg-teal-400/90 text-teal-900 font-bold text-xs rounded shadow-md hover:scale-110 transition-transform">台積電</button>
+                        <button onclick="scrollToProject('G10')" class="absolute top-[68%] left-[23%] px-4 py-1.5 bg-teal-300/90 dark:bg-teal-400/90 text-teal-900 font-bold text-xs rounded shadow-md hover:scale-110 transition-transform">聯電</button>
+                        <button onclick="scrollToProject('G2')" class="absolute top-[80%] left-[21%] px-4 py-1.5 bg-teal-300/90 dark:bg-teal-400/90 text-teal-900 font-bold text-xs rounded shadow-md hover:scale-110 transition-transform">華邦電</button>
+                        <button onclick="scrollToProject('G6')" class="absolute top-[90%] left-[16%] px-4 py-1.5 bg-teal-300/90 dark:bg-teal-400/90 text-teal-900 font-bold text-xs rounded shadow-md hover:scale-110 transition-transform">南亞科</button>
+                        
+                        <!-- B: 設計與封測 (Rose) -->
+                        <button onclick="scrollToProject('G11')" class="absolute top-[35%] left-[28%] px-4 py-1.5 bg-rose-300/90 dark:bg-rose-400/90 text-rose-900 font-bold text-xs rounded shadow-md hover:scale-110 transition-transform">聯發科</button>
+                        <button onclick="scrollToProject('G4')" class="absolute top-[75%] left-[42%] px-4 py-1.5 bg-rose-300/90 dark:bg-rose-400/90 text-rose-900 font-bold text-xs rounded shadow-md hover:scale-110 transition-transform">日月光</button>
+                        
+                        <!-- C: 電腦與周邊 (Orange) -->
+                        <button onclick="scrollToProject('G7')" class="absolute top-[30%] left-[62%] px-4 py-1.5 bg-orange-300/90 dark:bg-orange-400/90 text-orange-900 font-bold text-xs rounded shadow-md hover:scale-110 transition-transform">台達電</button>
+                        <button onclick="scrollToProject('G5')" class="absolute top-[65%] left-[51%] px-4 py-1.5 bg-orange-300/90 dark:bg-orange-400/90 text-orange-900 font-bold text-xs rounded shadow-md hover:scale-110 transition-transform">鴻海</button>
+                        <button onclick="scrollToProject('G1')" class="absolute top-[75%] left-[65%] px-4 py-1.5 bg-orange-300/90 dark:bg-orange-400/90 text-orange-900 font-bold text-xs rounded shadow-md hover:scale-110 transition-transform">緯創</button>
+                        
+                        <!-- D: 其他 (Fuchsia) -->
+                        <button onclick="scrollToProject('G8')" class="absolute top-[25%] left-[20%] px-4 py-1.5 bg-fuchsia-300/90 dark:bg-fuchsia-400/90 text-fuchsia-900 font-bold text-xs rounded shadow-md hover:scale-110 transition-transform">合一生技</button>
+                        <button onclick="scrollToProject('G9')" class="absolute top-[60%] left-[18%] px-4 py-1.5 bg-fuchsia-300/90 dark:bg-fuchsia-400/90 text-fuchsia-900 font-bold text-xs rounded shadow-md hover:scale-110 transition-transform">上銀科技</button>
+                    </div>
+
+                    <!-- 手機版：降級為產業類別清單 (List View) -->
+                    <div class="block sm:hidden space-y-4">
+                        <div class="p-4 rounded-xl border border-teal-200 dark:border-teal-900/50 bg-teal-50/50 dark:bg-teal-900/20">
+                            <h5 class="text-sm font-bold text-teal-700 dark:text-teal-400 mb-3 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-teal-400"></span> 半導體：製造與記憶體</h5>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="scrollToProject('G3')" class="px-3 py-1 bg-white dark:bg-tech-800 text-gray-700 dark:text-gray-300 text-xs rounded shadow-sm border border-gray-200 dark:border-gray-700">台積電</button>
+                                <button onclick="scrollToProject('G10')" class="px-3 py-1 bg-white dark:bg-tech-800 text-gray-700 dark:text-gray-300 text-xs rounded shadow-sm border border-gray-200 dark:border-gray-700">聯電</button>
+                                <button onclick="scrollToProject('G2')" class="px-3 py-1 bg-white dark:bg-tech-800 text-gray-700 dark:text-gray-300 text-xs rounded shadow-sm border border-gray-200 dark:border-gray-700">華邦電</button>
+                                <button onclick="scrollToProject('G6')" class="px-3 py-1 bg-white dark:bg-tech-800 text-gray-700 dark:text-gray-300 text-xs rounded shadow-sm border border-gray-200 dark:border-gray-700">南亞科</button>
+                            </div>
+                        </div>
+                        <div class="p-4 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50/50 dark:bg-rose-900/20">
+                            <h5 class="text-sm font-bold text-rose-700 dark:text-rose-400 mb-3 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-rose-400"></span> 半導體：設計與封測</h5>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="scrollToProject('G11')" class="px-3 py-1 bg-white dark:bg-tech-800 text-gray-700 dark:text-gray-300 text-xs rounded shadow-sm border border-gray-200 dark:border-gray-700">聯發科</button>
+                                <button onclick="scrollToProject('G4')" class="px-3 py-1 bg-white dark:bg-tech-800 text-gray-700 dark:text-gray-300 text-xs rounded shadow-sm border border-gray-200 dark:border-gray-700">日月光</button>
+                            </div>
+                        </div>
+                        <div class="p-4 rounded-xl border border-orange-200 dark:border-orange-900/50 bg-orange-50/50 dark:bg-orange-900/20">
+                            <h5 class="text-sm font-bold text-orange-700 dark:text-orange-400 mb-3 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-orange-400"></span> 電腦與周邊系統</h5>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="scrollToProject('G5')" class="px-3 py-1 bg-white dark:bg-tech-800 text-gray-700 dark:text-gray-300 text-xs rounded shadow-sm border border-gray-200 dark:border-gray-700">鴻海</button>
+                                <button onclick="scrollToProject('G1')" class="px-3 py-1 bg-white dark:bg-tech-800 text-gray-700 dark:text-gray-300 text-xs rounded shadow-sm border border-gray-200 dark:border-gray-700">緯創</button>
+                                <button onclick="scrollToProject('G7')" class="px-3 py-1 bg-white dark:bg-tech-800 text-gray-700 dark:text-gray-300 text-xs rounded shadow-sm border border-gray-200 dark:border-gray-700">台達電</button>
+                            </div>
+                        </div>
+                        <div class="p-4 rounded-xl border border-fuchsia-200 dark:border-fuchsia-900/50 bg-fuchsia-50/50 dark:bg-fuchsia-900/20">
+                            <h5 class="text-sm font-bold text-fuchsia-700 dark:text-fuchsia-400 mb-3 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-fuchsia-400"></span> 其他產業</h5>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="scrollToProject('G8')" class="px-3 py-1 bg-white dark:bg-tech-800 text-gray-700 dark:text-gray-300 text-xs rounded shadow-sm border border-gray-200 dark:border-gray-700">合一生技</button>
+                                <button onclick="scrollToProject('G9')" class="px-3 py-1 bg-white dark:bg-tech-800 text-gray-700 dark:text-gray-300 text-xs rounded shadow-sm border border-gray-200 dark:border-gray-700">上銀科技</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -639,14 +772,13 @@
             </div>
 
             <div class="mt-6 text-xs font-mono text-gray-400/70 tracking-widest uppercase">
-                Version 3.0.0
+                Version 3.2.0
             </div>
         </div>
     </footer>
 
     <!-- JS Logic -->
     <script>
-        // Custom safe Toast notification to replace alert()
         function showMessage(msg) {
             let toast = document.getElementById('custom-toast');
             if (!toast) {
@@ -663,6 +795,20 @@
                 toast.classList.add('opacity-0', 'translate-y-4');
             }, 3000);
         }
+
+        const categoryColors = {
+            'A': { light: 'rgba(20, 184, 166, 0.55)', dark: 'rgba(45, 212, 191, 0.75)', shadowLight: 'rgba(20, 184, 166, 0.45)', shadowDark: 'rgba(45, 212, 191, 0.6)' }, // Teal
+            'B': { light: 'rgba(225, 29, 72, 0.55)', dark: 'rgba(251, 113, 133, 0.75)', shadowLight: 'rgba(225, 29, 72, 0.45)', shadowDark: 'rgba(251, 113, 133, 0.6)' }, // Rose
+            'C': { light: 'rgba(234, 88, 12, 0.55)', dark: 'rgba(251, 146, 60, 0.75)', shadowLight: 'rgba(234, 88, 12, 0.45)', shadowDark: 'rgba(251, 146, 60, 0.6)' }, // Orange
+            'D': { light: 'rgba(192, 38, 211, 0.55)', dark: 'rgba(232, 121, 249, 0.75)', shadowLight: 'rgba(192, 38, 211, 0.45)', shadowDark: 'rgba(232, 121, 249, 0.6)' }  // Fuchsia
+        };
+
+        const categoryClasses = {
+            'A': { bgLight: 'bg-teal-100', bgDark: 'dark:bg-teal-900/30', textLight: 'text-teal-600', textDark: 'dark:text-teal-400' },
+            'B': { bgLight: 'bg-rose-100', bgDark: 'dark:bg-rose-900/30', textLight: 'text-rose-600', textDark: 'dark:text-rose-400' },
+            'C': { bgLight: 'bg-orange-100', bgDark: 'dark:bg-orange-900/30', textLight: 'text-orange-600', textDark: 'dark:text-orange-400' },
+            'D': { bgLight: 'bg-fuchsia-100', bgDark: 'dark:bg-fuchsia-900/30', textLight: 'text-fuchsia-600', textDark: 'dark:text-fuchsia-400' }
+        };
 
         const projects = [
             { id: "G1", zh: "緯創", en: "Wistron", category: "C", icon: "ph-desktop", website: "https://www.wits.com/tw/", finance: "https://tw.stock.yahoo.com/quote/3231.TW/technical-analysis", logo: "https://drive.google.com/file/d/1kw9qvT77owkjKWc6QpS2u3VLTBbJqtBH/view", link: "https://shirley09010120-ux.github.io/wistron-G1-./" },
@@ -858,10 +1004,10 @@
                 logicP2: "透過互動式網頁專題，各組將企業資料、產業分析、策略思維與 AI 工具應用整合呈現，讓學習成果不只停留在課堂報告，而能轉化為可被瀏覽、分享與討論的策略學習作品。",
                 
                 linkTextbookTitle: "課程教材",
-                linkTextbookSub: "查看核心教材與參考書",
+                linkTextbookSub: "查看本課程使用的核心教材、參考書目與策略管理學習資源。",
                 linkTextbookBtn: "查看教材 →",
                 linkHubTitle: "課程專區",
-                linkHubSub: "密碼保護的學習資源",
+                linkHubSub: "進入密碼保護的課程資源區，查看專案連結、學習資料與相關內容。",
                 linkHubBtn: "進入專區 →",
                 hubNote: "修課同學請至Moodle查看密碼；若為訪客請寄信至原著作者 駱世民教授。",
 
@@ -896,6 +1042,15 @@
                 filterB: "半導體：設計與封測",
                 filterC: "電腦與周邊系統",
                 filterD: "其他產業",
+                
+                mapTitle: "Industry Landscape",
+                mapSubtitle: "產業地圖",
+                axisYTop: "知識密集/輕資產",
+                axisYBottom: "資本密集/重資產",
+                axisXLeft: "上游",
+                axisXRight: "下游",
+                axisXTitle: "價值鏈",
+
                 profileTitle: "Profile / 團隊簡歷",
                 modalCurr: "現職 / Current",
                 modalExp: "經歷 / Experience",
@@ -957,10 +1112,10 @@
                 logicP2: "Through interactive web-based projects, each team integrates company information, industry analysis, strategic thinking, and AI-assisted tools to present its learning outcomes. As a result, the final projects go beyond classroom presentations and become strategy-learning works that can be browsed, shared, and discussed.",
                 
                 linkTextbookTitle: "Course Textbook",
-                linkTextbookSub: "Access core materials",
+                linkTextbookSub: "Access the core materials and references for strategic management learning.",
                 linkTextbookBtn: "View Textbook →",
                 linkHubTitle: "Executive Hub",
-                linkHubSub: "Password-protected hub",
+                linkHubSub: "Password-protected hub for course materials, project links, and learning resources.",
                 linkHubBtn: "Enter Hub →",
                 hubNote: "Enrolled students should check Moodle for the website password. Visitors may contact Professor Shih-Min Lo by email.",
 
@@ -995,6 +1150,15 @@
                 filterB: "Semi: Design & OSAT",
                 filterC: "PC & Peripherals",
                 filterD: "Others",
+                
+                mapTitle: "Industry Landscape",
+                mapSubtitle: "Strategic Map",
+                axisYTop: "Knowledge / Light Asset",
+                axisYBottom: "Capital / Heavy Asset",
+                axisXLeft: "Upstream",
+                axisXRight: "Downstream",
+                axisXTitle: "Value Chain",
+
                 profileTitle: "Profile",
                 modalCurr: "Current",
                 modalExp: "Experience",
@@ -1017,7 +1181,7 @@
             }
         };
 
-        // --- Memory-based State Management ---
+        // --- State Management ---
         let currentLang = 'zh';
         let isSpeaking = false;
         let isAudioPaused = false;
@@ -1031,7 +1195,6 @@
         let currentModalPerson = null;
 
         document.addEventListener('DOMContentLoaded', () => {
-            // 預設以亮色模式作為起始頁，不跟隨系統深色設定
             isDarkMode = false;
             document.documentElement.classList.remove('dark');
             document.documentElement.style.colorScheme = 'light';
@@ -1081,7 +1244,6 @@
                 card.classList.add('touch-active');
             };
 
-            // touchstart 比 pointerdown 更早觸發，可避免 iOS 先出現預設白色 tap highlight。
             document.addEventListener('touchstart', applyTouchActive, { passive: true, capture: true });
             document.addEventListener('pointerdown', applyTouchActive, { passive: true, capture: true });
 
@@ -1119,6 +1281,7 @@
                 }
             });
 
+            // Re-render button texts inside map
             renderProjects();
             
             if (currentModalPerson) {
@@ -1133,15 +1296,56 @@
         function filterProjects(category, btnElement) {
             activeFilter = category;
             
+            const activeClasses = {
+                'ALL': ['bg-blue-600', 'text-white', 'dark:bg-blue-500', 'dark:text-white', 'border-transparent'],
+                'A': ['bg-teal-500', 'text-white', 'dark:bg-teal-500', 'dark:text-white', 'border-transparent'],
+                'B': ['bg-rose-500', 'text-white', 'dark:bg-rose-500', 'dark:text-white', 'border-transparent'],
+                'C': ['bg-orange-500', 'text-white', 'dark:bg-orange-500', 'dark:text-white', 'border-transparent'],
+                'D': ['bg-fuchsia-500', 'text-white', 'dark:bg-fuchsia-500', 'dark:text-white', 'border-transparent']
+            };
+            
+            const inactiveClasses = ['bg-white', 'text-gray-600', 'dark:bg-tech-800', 'dark:text-gray-300', 'border-gray-200', 'dark:border-gray-700'];
+
             document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('bg-blue-600', 'text-white', 'dark:bg-tech-accent', 'dark:text-tech-900');
-                btn.classList.add('bg-white', 'text-gray-600', 'dark:bg-tech-800', 'dark:text-gray-300');
+                Object.values(activeClasses).forEach(clsArray => {
+                    btn.classList.remove(...clsArray);
+                });
+                btn.classList.add(...inactiveClasses);
             });
             
-            btnElement.classList.remove('bg-white', 'text-gray-600', 'dark:bg-tech-800', 'dark:text-gray-300');
-            btnElement.classList.add('bg-blue-600', 'text-white', 'dark:bg-tech-accent', 'dark:text-tech-900');
+            btnElement.classList.remove(...inactiveClasses);
+            if (activeClasses[category]) {
+                btnElement.classList.add(...activeClasses[category]);
+            }
 
             renderProjects();
+        }
+
+        function scrollToProject(groupId) {
+            // First, make sure the project card is visible by resetting filter to ALL if needed
+            const projData = projects.find(p => p.id === groupId);
+            if (activeFilter !== 'ALL' && projData && activeFilter !== projData.category) {
+                const allBtn = document.querySelector('.filter-btn[data-i18n="filterAll"]');
+                if(allBtn) filterProjects('ALL', allBtn);
+            }
+
+            setTimeout(() => {
+                const card = document.getElementById('card-' + groupId);
+                if (card) {
+                    // Smooth scroll to card, slightly offset to avoid sticky nav
+                    const yOffset = -100; 
+                    const y = card.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                    window.scrollTo({top: y, behavior: 'smooth'});
+                    
+                    // Add highlight animation
+                    card.classList.remove('highlight-pulse');
+                    void card.offsetWidth; // trigger reflow
+                    card.classList.add('highlight-pulse');
+                    setTimeout(() => {
+                        card.classList.remove('highlight-pulse');
+                    }, 1500);
+                }
+            }, 50);
         }
 
         function renderProjects() {
@@ -1170,6 +1374,9 @@
                     }
                 }
 
+                const catStyle = categoryColors[proj.category] || categoryColors['A'];
+                const cardClasses = categoryClasses[proj.category] || categoryClasses['A'];
+
                 const logoBgHtml = logoUrl ? `
                     <div class="absolute top-8 right-4 w-32 h-32 sm:w-40 sm:h-40 opacity-20 dark:opacity-40 pointer-events-none select-none z-0 transition-all duration-700 ease-out group-hover:opacity-35 dark:group-hover:opacity-70 group-hover:scale-110 origin-center flex items-center justify-center">
                         <div class="absolute inset-0 w-[80%] h-[80%] m-auto rounded-full bg-white/0 dark:bg-white/40 blur-[30px] group-hover:dark:bg-white/60 transition-colors duration-700 z-0"></div>
@@ -1190,12 +1397,16 @@
                 ` : '';
 
                 const card = `
-                    <div class="glass rounded-xl p-6 tech-card project-card flex flex-col justify-between h-full group relative overflow-hidden">
-                        <div class="absolute -right-6 -top-6 w-24 h-24 bg-blue-500/10 dark:bg-tech-accent/10 rounded-full blur-xl group-hover:bg-blue-500/20 dark:group-hover:bg-tech-accent/20 transition-all duration-500 z-0"></div>
+                    <div id="card-${proj.id}" class="glass rounded-xl p-6 tech-card project-card flex flex-col justify-between h-full group relative overflow-hidden border border-gray-200 dark:border-gray-700"
+                         style="--cat-color-light: ${catStyle.light}; --cat-color-dark: ${catStyle.dark}; --cat-shadow-light: ${catStyle.shadowLight}; --cat-shadow-dark: ${catStyle.shadowDark};">
+                        
+                        <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full blur-xl transition-all duration-500 z-0 bg-transparent opacity-0 group-hover:opacity-100" style="background-color: var(--cat-color-light);"></div>
+                        
                         ${logoBgHtml}
+
                         <div class="relative z-10">
                             <div class="flex justify-between items-start mb-4">
-                                <div class="w-12 h-12 rounded-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur flex items-center justify-center text-2xl text-blue-600 dark:text-tech-accent group-hover:scale-110 transition-transform shadow-sm border border-gray-100 dark:border-gray-700">
+                                <div class="w-12 h-12 rounded-lg backdrop-blur flex items-center justify-center text-2xl group-hover:scale-110 transition-colors shadow-sm border border-gray-100 dark:border-gray-700 ${cardClasses.bgLight} ${cardClasses.bgDark} ${cardClasses.textLight} ${cardClasses.textDark}">
                                     ${iconHtml}
                                 </div>
                                 <span class="text-xs font-bold px-2 py-1 bg-gray-200/80 dark:bg-gray-700/80 backdrop-blur text-gray-700 dark:text-gray-300 rounded uppercase tracking-wider">
@@ -1213,7 +1424,7 @@
                             </div>
                         </div>
                         <div class="relative z-10 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                            <a href="${proj.link}" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 rounded-lg bg-gray-900 dark:bg-tech-700 text-white font-medium text-sm hover:bg-blue-600 dark:hover:bg-tech-accent hover:text-white dark:hover:text-tech-900 transition-colors flex items-center justify-center gap-2">
+                            <a href="${proj.link}" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 rounded-lg bg-gray-900 dark:bg-tech-700 text-white font-medium text-sm hover:bg-gray-700 dark:hover:bg-tech-600 transition-colors flex items-center justify-center gap-2">
                                 <span>${viewBtn}</span>
                                 <i class="ph ph-arrow-right"></i>
                             </a>
@@ -1222,6 +1433,19 @@
                 `;
                 container.innerHTML += card;
             });
+
+            // Update Map Buttons Translation
+            const btnG1 = document.getElementById('map-btn-G1'); if(btnG1) btnG1.innerText = currentLang==='zh'?'緯創':'Wistron';
+            const btnG2 = document.getElementById('map-btn-G2'); if(btnG2) btnG2.innerText = currentLang==='zh'?'華邦電':'Winbond';
+            const btnG3 = document.getElementById('map-btn-G3'); if(btnG3) btnG3.innerText = currentLang==='zh'?'台積電':'TSMC';
+            const btnG4 = document.getElementById('map-btn-G4'); if(btnG4) btnG4.innerText = currentLang==='zh'?'日月光':'ASE';
+            const btnG5 = document.getElementById('map-btn-G5'); if(btnG5) btnG5.innerText = currentLang==='zh'?'鴻海':'Foxconn';
+            const btnG6 = document.getElementById('map-btn-G6'); if(btnG6) btnG6.innerText = currentLang==='zh'?'南亞科':'Nanya';
+            const btnG7 = document.getElementById('map-btn-G7'); if(btnG7) btnG7.innerText = currentLang==='zh'?'台達電':'Delta';
+            const btnG8 = document.getElementById('map-btn-G8'); if(btnG8) btnG8.innerText = currentLang==='zh'?'合一生技':'Oneness';
+            const btnG9 = document.getElementById('map-btn-G9'); if(btnG9) btnG9.innerText = currentLang==='zh'?'上銀科技':'HIWIN';
+            const btnG10 = document.getElementById('map-btn-G10'); if(btnG10) btnG10.innerText = currentLang==='zh'?'聯電':'UMC';
+            const btnG11 = document.getElementById('map-btn-G11'); if(btnG11) btnG11.innerText = currentLang==='zh'?'聯發科':'MediaTek';
         }
 
         // --- Modal System ---
@@ -1287,7 +1511,6 @@
         } catch(e) {}
 
         function cleanText(text) {
-            // 過濾容易導致機器人停頓的符號，使語音平滑
             return text.replace(/[\n\r]/g, ' ').replace(/[「」『』【】（）()]/g, '').replace(/\s+/g, ' ').trim();
         }
 
